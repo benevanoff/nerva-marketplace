@@ -1,0 +1,7 @@
+.markethome-container {
+    background: #219de5;
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: space-between; /* Aligns children with space between */
+    align-items: center;
+}

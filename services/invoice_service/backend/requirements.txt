@@ -1,0 +1,11 @@
+uvicorn
+fastapi
+aiomysql
+starlette-session
+cryptography
+pytest
+requests
+python-multipart
+nerva-py
+pika
+websockets

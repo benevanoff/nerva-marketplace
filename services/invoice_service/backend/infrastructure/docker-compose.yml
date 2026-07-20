@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+# Dependency Services
+  db_invoice: # MySQL Server
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    volumes:
+      - db_invoice_data:/var/lib/mysql
+
+  rabbitmq: # Rabbit MQ For Tx Notifications
+    image: "rabbitmq:3-management"
+    environment:
+      RABBITMQ_DEFAULT_USER: "user"
+      RABBITMQ_DEFAULT_PASS: "passwordkkjhgq"
+    ports:
+      - "5672:5672"
+
+  nerva: # nerva-wallet-rpc with transaction notifier
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.nerva
+    ports:
+      - 28082:28082
+  # Servers
+  payments_rest_microservices: # REST Server for Payments Microservices
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.payments
+    volumes:
+      - ../:/app
+    ports:
+      - 8002:8002
+
+  payments_websocket_server: # Websocket Server for Payments Microservices
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.websockets
+    ports:
+      - 8765:8765
+
+volumes:
+  db_invoice_data:
+
+networks:
+  default:
+    external:
+      name: mystery_network

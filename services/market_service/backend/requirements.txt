@@ -1,0 +1,9 @@
+uvicorn
+fastapi
+aiomysql
+starlette-session
+cryptography
+pytest
+requests
+python-multipart
+redispy

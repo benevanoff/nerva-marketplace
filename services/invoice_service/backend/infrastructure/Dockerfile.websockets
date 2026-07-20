@@ -1,0 +1,12 @@
+FROM --platform=linux/amd64 python:3.9
+
+WORKDIR /app
+
+COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV DB_HOST="db"
+
+EXPOSE 8765
+
+CMD ["python3", "-u", "src/websocket_server.py"]

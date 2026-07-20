@@ -1,0 +1,96 @@
+.payment-details-card-grid {
+    display: grid;
+    grid-template-columns: 20% 55% 25%;
+    gap: 5px;
+    grid-auto-flow: column;
+    box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.2);
+    width: 70%;
+    place-items: center;
+}
+
+.payment-details-card-grid img {
+    width: auto;
+}
+
+.invoice-container {
+    display: grid;
+    place-items: center;
+    margin: 0;
+    gap: 15px;
+    width: 100%;
+    background-color: blanchedalmond;
+    min-height: 100vh;
+}
+
+#readonly-textarea {
+    width: 90%; /* Full width */
+    padding: 10px; /* Comfortable padding */
+    border: 2px solid #007bff; /* Solid border with a color */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #f0f0f0; /* Light gray background */
+    color: #333; /* Dark text color for contrast */
+    font-size: 16px; /* Readable text size */
+    resize: none; /* Disable manual resizing */
+    overflow: hidden; /* Hide the overflow */
+    cursor: not-allowed; /* Cursor to indicate it's not editable */
+    outline: none; /* Disable the focus outline since it's read-only */
+}
+
+#readonly-textarea:hover, #readonly-textarea:focus {
+    background-color: #e9ecef;
+}
+
+/* StatusBar.css */
+.status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly; /* Adjust dot spacing */
+    position: relative;
+    width: 100%; /* Set a fixed width if needed */
+}
+
+.status-line, .status-line-filled {
+    position: absolute;
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.status-line {
+    width: 100%;
+    background-color: #ccc; /* Grey line color */
+}
+
+.status-line-filled {
+    background-color: #007bff; /* Blue line color */
+    left: 0; /* Align with the start of the bar */
+}
+
+.status-dot {
+    z-index: 1; 
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ddd;
+    margin: 0 10px;
+}
+
+.status-dot.filled {    .invoice-container {
+    height: 100%;
+}
+    background-color: #007bff; /* Or any color you prefer */
+}
+
+#TransactionsContainer {
+    border-color: orange;
+    border-width: 2px;
+    border-style: solid;
+}
+
+@media screen and (max-width: 600px) {
+    .payment-details-card-grid {
+        grid-template-columns: 1fr; /* Stack items vertically */
+        grid-auto-flow: row; /* Arrange grid items in rows */
+        width: 90%; /* Adjust width for smaller screens */
+    }
+}

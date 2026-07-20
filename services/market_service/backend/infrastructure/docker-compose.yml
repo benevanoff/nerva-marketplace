@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+# Dependency Services
+  db: # MySQL Server
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    volumes:
+      - db_market_data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  redis: # Redis Server used for Session Caching
+    image: 'redis:alpine'
+    command: redis-server --requirepass yourpasswordkkfkfa
+    ports:
+      - '6379:6379'
+
+  marketplace_rest_microservices: # REST Server for Marketplace Microservices
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.marketplace
+    volumes:
+      - ../:/app
+    ports:
+      - 8001:8001
+
+volumes:
+  db_market_data:
+
+networks:
+  default:
+    external:
+      name: mystery_network

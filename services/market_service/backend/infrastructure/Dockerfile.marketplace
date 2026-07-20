@@ -1,0 +1,13 @@
+FROM --platform=linux/amd64 python:3.9
+
+WORKDIR /app
+
+COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV DB_HOST="db"
+ENV CACHE_HOST="redis"
+
+EXPOSE 8001
+
+CMD python3 -m uvicorn src.http_server:app --reload --host 0.0.0.0 --port 8001

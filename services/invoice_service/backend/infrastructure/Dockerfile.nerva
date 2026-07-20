@@ -1,0 +1,21 @@
+FROM --platform=linux/amd64 python:3.11
+
+WORKDIR /app
+
+COPY ./requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# download and extract nerva binaries
+RUN curl -fL -O https://github.com/nerva-project/nerva/releases/download/v0.3.0.0/nerva-linux-x86_64-v0.3.0.0.tar.bz2
+RUN tar -xf nerva-linux-x86_64-v0.3.0.0.tar.bz2
+
+# copy the application code into the container
+COPY ./keys .
+COPY ./src/process_new_tx.py .
+COPY ./src/dependencies.py .
+
+ENV DB_HOST="db_invoice"
+
+EXPOSE 28082
+
+CMD nerva-linux-x86_64-v0.3.0.0/nerva-wallet-rpc --wallet-file mainnet_rpc --password rpc --rpc-bind-ip 0.0.0.0 --confirm-external-bind --rpc-bind-port 28082 --daemon-address 192.168.1.143:17566 --log-level 2 --disable-rpc-login --tx-notify "/usr/local/bin/python3 /app/process_new_tx.py %s"
