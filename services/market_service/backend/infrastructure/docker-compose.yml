@@ -9,7 +9,7 @@ services:
     volumes:
       - db_market_data:/var/lib/mysql
     ports:
-      - 3306:3306
+      - 3306:3306 # expose database port for debug purposes
 
   redis: # Redis Server used for Session Caching
     image: 'redis:alpine'
