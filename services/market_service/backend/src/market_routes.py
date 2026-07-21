@@ -78,12 +78,6 @@ async def create_listing(session_id:str=Cookie(None), session_storage=Depends(ge
             VALUES
                 (%s, %s, %s, %s, %s)
             """, (title, description, f'{img_id}.{file_type}', price_xnv, username))
-        print(f"""
-            INSERT INTO listings
-                (title, description, image_name, price_xnv, vendor)
-            VALUES
-                ("{title}", "{description}", "{img_id}.{file_type}", {price_xnv}, "{username}")
-            """, (title, description, f'{img_id}.{file_type}', price_xnv, username))
 
 @market_router.get("/market/listing/image/{image_name}")
 async def get_image(image_name:str, rds_client=Depends(get_db)):

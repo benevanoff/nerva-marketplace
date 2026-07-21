@@ -43,16 +43,27 @@ async def checkout(session_id:str=Cookie(None), session_storage=Depends(get_sess
     async with sql_client.cursor() as cur:
         # get the total value of the cart
         cart_total = 0
+        vendor_username = None
         for item in cart["items"]:
-            await cur.execute("SELECT price_xnv FROM listings WHERE listing_id = %s", (item))
-            cart_total += float((await cur.fetchone())["price_xnv"])
+            await cur.execute("SELECT vendor, price_xnv FROM listings WHERE listing_id = %s", (item))
+            listing_record = await cur.fetchone()
+            cart_total += float((listing_record)["price_xnv"])
+            # for now, assert that all order items in a listing come from the same vendor
+            if not vendor_username:
+                vendor_username = listing_record["vendor"]
+            elif vendor_username != listing_record["vendor"]:
+                return 505
     # create an invoice for the cart order
     invoice_create_response = requests.post("http://payments_rest_microservices:8002/invoice/create", json={"amount": cart_total})
     # clear the session cart if successful
     assert invoice_create_response.status_code == 200
     session_storage.clearCart(session_id)
-    return invoice_create_response.json()
+    # create an new order record
+    buyer_username = session_storage.getUserFromSession(session_id)
+    async with sql_client.cursor() as cur:
+        await cur.execute("INSERT INTO orders (vendor, buyer, invoice_id) VALUES (%s,%s,%s)", (vendor_username, buyer_username, invoice_create_response.json()["invoice_id"]))
+        order_id = cur.lastrowid
+        for order_item in cart["items"]:
+            await cur.execute("INSERT INTO order_items (order_id, item_listing_id) VALUES (%s,%s)", (order_id, order_item))
 
-@cart_router.post("/cart/webhook_listener")
-async def cart_webhook_listener():
-    pass
+    return invoice_create_response.json()

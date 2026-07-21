@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .user_routes import router as user_router
 from .market_routes import market_router
 from .cart_routes import cart_router
+from .order_routes import orders_router
 
 app = FastAPI()
 
@@ -35,3 +36,4 @@ def root():
 app.include_router(user_router)
 app.include_router(market_router)
 app.include_router(cart_router)
+app.include_router(orders_router)

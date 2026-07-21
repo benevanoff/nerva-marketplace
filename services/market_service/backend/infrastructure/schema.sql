@@ -27,3 +27,19 @@ CREATE TABLE listings (
     price_xnv DECIMAL(20,12),
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    vendor VARCHAR(255) NOT NULL,
+    buyer VARCHAR(255) NOT NULL,
+    invoice_id INT NOT NULL,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS `order_items`;
+CREATE TABLE order_items (
+    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    item_listing_id INT NOT NULL
+);
