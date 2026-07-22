@@ -7,7 +7,8 @@ CREATE TABLE users (
     username VARCHAR(255) PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    status enum('unverified', 'active', 'deactivated') DEFAULT 'unverified'
+    status enum('unverified', 'active', 'deactivated') DEFAULT 'unverified',
+    is_vendor INT DEFAULT 0
 );
 
 DROP TABLE IF EXISTS `user_validation_tokens`;

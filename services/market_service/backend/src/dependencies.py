@@ -27,22 +27,17 @@ class Sessions:
     def __init__(self):
         self.session_storage_client = redis.StrictRedis(host=os.environ.get("CACHE_HOST", "localhost"), port=6379, db=0, password="yourpasswordkkfkfa")
 
-    def makeNewUserSession(self, username):
+    def makeNewUserSession(self, username, is_vendor=False):
         session_id = str(uuid.uuid4())
-        self.session_storage_client.set(session_id, json.dumps({"username": username}))
+        self.session_storage_client.set(session_id, json.dumps({"username": username, "is_vendor": is_vendor}))
         return session_id
 
     def getUserFromSession(self, session_id):
         return json.loads(self.session_storage_client.get(session_id).decode())["username"]
     
-    def getCartIdFromSession(self, session_id):
-        cart = json.loads(self.session_storage_client.get(session_id).decode()).get("cart")
-        if cart:
-            return cart["cart_id"]
-        
-    def getCartFromSession(self, session_id):
-        return json.loads(self.session_storage_client.get(session_id).decode()).get("cart")
-        
+    def getIsVendorFromSession(self, session_id):
+        return json.loads(self.session_storage_client.get(session_id).decode())["is_vendor"]
+
     def makeNewCartForSession(self, session_id):
         cart = {
             "cart_id": str(uuid.uuid4()),
@@ -53,6 +48,14 @@ class Sessions:
         self.session_storage_client.set(session_id, json.dumps(current_session_data))
         return cart["cart_id"]
     
+    def getCartIdFromSession(self, session_id):
+        cart = json.loads(self.session_storage_client.get(session_id).decode()).get("cart")
+        if cart:
+            return cart["cart_id"]
+
+    def getCartFromSession(self, session_id):
+        return json.loads(self.session_storage_client.get(session_id).decode()).get("cart")
+
     def addItemToSessionCart(self, session_id, listing_id):
         current_session_data = json.loads(self.session_storage_client.get(session_id).decode())
         current_session_data["cart"]["items"].append(listing_id)

@@ -62,7 +62,7 @@ async def user_login(request:LoginRequest, response:Response, rds_client=Depends
     if not user_result_row:
         raise HTTPException(status_code=401)
     # add Redis entry {session_id:username} with 2 hour timeout
-    session_id = session_storage.makeNewUserSession(request.username)
+    session_id = session_storage.makeNewUserSession(request.username, is_vendor=user_result_row["is_vendor"])
     # return session id in response body and cookie
     response.set_cookie(key="session_id", value=session_id)
 
