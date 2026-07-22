@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ShoppingCartButton.css';
 import './Navbar.css';
+import UserContext from './UserContext';
 
 const ShoppingCartButton = () => {
     const navigate = useNavigate();
@@ -30,14 +31,17 @@ const NavButton = ({ onClick }) => {
 };
 
 const NavTab = ({ isOpen }) => {
-  const navigate = useNavigate();
-  return (
-    <div className={`navbar ${isOpen ? 'open' : ''}`}>
-      <button onClick={() => {navigate('/create_listing')}}>Create Listing</button>
-      <button onClick={() => {navigate('/vendor/orders')}}>Vendor Orders</button>
-      <button>Logout</button>
-    </div>
-  );
+    const navigate = useNavigate();
+    const userDetails = useContext(UserContext);
+    const isVendor = Boolean(userDetails && userDetails.is_vendor);
+
+    return (
+        <div className={`navbar ${isOpen ? 'open' : ''}`}>
+            {isVendor && <button onClick={() => {navigate('/create_listing')}}>Create Listing</button>}
+            {isVendor && <button onClick={() => {navigate('/vendor/orders')}}>Vendor Orders</button>}
+            <button>Logout</button>
+        </div>
+    );
 };
 
 const NavBar = () => {
