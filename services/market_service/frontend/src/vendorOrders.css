@@ -1,0 +1,86 @@
+.vendor-orders-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.vendor-orders-container h1 {
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.order-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: box-shadow 0.2s ease;
+}
+
+.order-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-item span {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.order-id {
+    font-weight: bold;
+    color: #333;
+}
+
+.order-date {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.order-amount {
+    font-weight: 500;
+    color: #7682E9;
+}
+
+.order-status {
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.order-status.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.order-status.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.order-status.status-failed {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.order-status.status-processing {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.error {
+    color: #d32f2f;
+    padding: 1rem;
+    background-color: #ffebee;
+    border-radius: 4px;
+}

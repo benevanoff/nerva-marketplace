@@ -13,6 +13,7 @@ import ListingsDisplay from "./ListingsDisplay";
 import Cart from './Cart.js'
 import Invoice from "./Invoice.js";
 import Listing from "./Listing.js"
+import VendorOrders from "./VendorOrders.js"
 
 const Home = () => {
   const [userDetails, setUser] = useState(null);
@@ -57,6 +58,7 @@ function App() {
           <Route path="/listing/:listing_id" element={<Listing/>} />
           <Route path="/cart" element={<Cart/>} />
           <Route path="/invoice/:invoice_id" element={<Invoice/>} />
+          <Route path="/vendor/orders" element={<VendorOrders/>} />
           <Route path="/" element={<Home />} />
         </Routes>
     </Router>

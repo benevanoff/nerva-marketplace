@@ -34,6 +34,7 @@ const NavTab = ({ isOpen }) => {
   return (
     <div className={`navbar ${isOpen ? 'open' : ''}`}>
       <button onClick={() => {navigate('/create_listing')}}>Create Listing</button>
+      <button onClick={() => {navigate('/vendor/orders')}}>Vendor Orders</button>
       <button>Logout</button>
     </div>
   );
