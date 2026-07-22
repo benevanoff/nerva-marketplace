@@ -28,18 +28,34 @@ async def get_cart_details(session_id:str=Cookie(None), session_storage=Depends(
 async def add_item_to_cart(listing_id:int, session_id:str=Cookie(None), session_storage=Depends(get_sessions)):
     if not session_id:
         raise HTTPException(status_code=401)
+    # todo: make sure the requestor isnt the vendor of the listing item
     cart_id = session_storage.getCartIdFromSession(session_id)
     if not cart_id:
         cart_id = session_storage.makeNewCartForSession(session_id)
     session_storage.addItemToSessionCart(session_id, listing_id)
     print(session_storage.session_storage_client.get(session_id))
 
+class ShippingDetails(BaseModel):
+    details: str
+@cart_router.post("/card/shipping_details/add")
+async def add_shipping_details(request:ShippingDetails, response:Response, session_id:str=Cookie(None), session_storage=Depends(get_sessions), sql_client=Depends(get_db)):
+    if not session_id:
+        raise HTTPException(status_code=401)
+    cart_id = session_storage.getCartIdFromSession(session_id)
+    if not cart_id:
+        cart_id = session_storage.makeNewCartForSession(session_id)
+    session_storage.updateCartShippingData(session_id, request.details)
+
 @cart_router.post("/cart/checkout")
 async def checkout(session_id:str=Cookie(None), session_storage=Depends(get_sessions), sql_client=Depends(get_db)):
-    # get the total cost of the cart
     cart = session_storage.getCartFromSession(session_id)
     if not cart:
         return
+    # make sure shipping details have been attached to the cart
+    print("cart", cart)
+    if not cart.get("shipping_data"):
+        return 300
+    # get the total cost of the cart
     async with sql_client.cursor() as cur:
         # get the total value of the cart
         cart_total = 0

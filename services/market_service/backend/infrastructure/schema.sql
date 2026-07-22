@@ -44,3 +44,10 @@ CREATE TABLE order_items (
     order_id INT NOT NULL,
     item_listing_id INT NOT NULL
 );
+
+DROP TABLE IF EXISTS `order_shipping`;
+CREATE TABLE order_shipping (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    shipping_note TEXT NOT NULL
+);

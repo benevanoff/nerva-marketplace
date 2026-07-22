@@ -22,6 +22,10 @@ There is a button labelled "Logout" in the frontend navigation page.
 
 ### Browse Listings
 
+Once the user is logged in, the homepage should display all of the current marketplace listings as a scrollable list/grid.
+
+Clicking on a specific listing should take the user to the page for that specific item to view its details.
+
 ### Adding an item to your cart
 
 ### Cart Management
