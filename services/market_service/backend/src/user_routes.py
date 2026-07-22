@@ -82,7 +82,7 @@ async def users_whoami(session_id:str=Cookie(None), rds_client=Depends(get_db), 
     username = session_storage.getUserFromSession(session_id)
     async with rds_client.cursor() as cur:
         await cur.execute("""
-            SELECT username, email, status
+            SELECT username, email, status, is_vendor
             FROM users
             WHERE username = %s
             """, (username))
