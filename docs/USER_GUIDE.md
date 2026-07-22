@@ -17,3 +17,13 @@ The frontend homepage should prompt you for a username and password if you have 
 There is a button labelled "Logout" in the frontend navigation page.
 
 (Button doesnt work - implementation TODO)
+
+## Placing an Order
+
+### View Listings
+
+### Adding an item to your cart
+
+### Cart Management
+
+### Checkout
