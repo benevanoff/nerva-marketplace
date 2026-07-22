@@ -20,7 +20,7 @@ There is a button labelled "Logout" in the frontend navigation page.
 
 ## Placing an Order
 
-### View Listings
+### Browse Listings
 
 ### Adding an item to your cart
 
