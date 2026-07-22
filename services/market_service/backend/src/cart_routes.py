@@ -37,7 +37,7 @@ async def add_item_to_cart(listing_id:int, session_id:str=Cookie(None), session_
 
 class ShippingDetails(BaseModel):
     details: str
-@cart_router.post("/card/shipping_details/add")
+@cart_router.post("/cart/shipping_details/add")
 async def add_shipping_details(request:ShippingDetails, response:Response, session_id:str=Cookie(None), session_storage=Depends(get_sessions), sql_client=Depends(get_db)):
     if not session_id:
         raise HTTPException(status_code=401)

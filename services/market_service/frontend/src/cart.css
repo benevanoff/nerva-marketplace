@@ -25,3 +25,27 @@
     margin: 0;
     gap: 15px;
 }
+
+.shipping-details-section {
+    width: 90%;
+    max-width: 500px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.shipping-details-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.shipping-details-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    resize: vertical;
+}
