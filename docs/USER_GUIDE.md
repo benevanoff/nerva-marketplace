@@ -2,11 +2,11 @@
 
 ### Register a new user account
 
+The frontend homepage should prompt you to login and there should be a link underneath that login form to register a new account if you dont already have one.
+
 To submit a new user registration request, you must provide an email, username and password.
 
 Before you are able to login with your new account, it must be activated by supplying the activation code (how to supply to user?).
-
-Frontend implementation is TODO
 
 ### Login
 
