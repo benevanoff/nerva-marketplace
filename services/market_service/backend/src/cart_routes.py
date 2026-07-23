@@ -45,6 +45,7 @@ async def add_shipping_details(request:ShippingDetails, response:Response, sessi
     if not cart_id:
         cart_id = session_storage.makeNewCartForSession(session_id)
     session_storage.updateCartShippingData(session_id, request.details)
+    return 200
 
 @cart_router.post("/cart/checkout")
 async def checkout(session_id:str=Cookie(None), session_storage=Depends(get_sessions), sql_client=Depends(get_db)):
@@ -53,7 +54,8 @@ async def checkout(session_id:str=Cookie(None), session_storage=Depends(get_sess
         return
     # make sure shipping details have been attached to the cart
     print("cart", cart)
-    if not cart.get("shipping_data"):
+    shipping_data = cart.get("shipping_data")
+    if not shipping_data:
         return 300
     # get the total cost of the cart
     async with sql_client.cursor() as cur:
@@ -81,5 +83,5 @@ async def checkout(session_id:str=Cookie(None), session_storage=Depends(get_sess
         order_id = cur.lastrowid
         for order_item in cart["items"]:
             await cur.execute("INSERT INTO order_items (order_id, item_listing_id) VALUES (%s,%s)", (order_id, order_item))
-
+        await cur.execute("INSERT INTO order_shipping (order_id, shipping_note) VALUES (%s, %s)", (order_id, shipping_data))
     return invoice_create_response.json()

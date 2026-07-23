@@ -64,6 +64,7 @@ class Sessions:
     def updateCartShippingData(self, session_id, shipping_data):
         current_session_data = json.loads(self.session_storage_client.get(session_id).decode())
         current_session_data["cart"]["shipping_data"] = shipping_data
+        self.session_storage_client.set(session_id, json.dumps(current_session_data))
 
     def clearCart(self, session_id):
         current_session_data = json.loads(self.session_storage_client.get(session_id).decode())
