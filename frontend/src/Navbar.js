@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import NervaLogo from './nerva-coin-logo.png';
 import './ShoppingCartButton.css';
 import './Navbar.css';
 import UserContext from './UserContext';
@@ -84,7 +85,10 @@ const NavBar = () => {
     return (<>
         <div className='markethome-container'>
             <NavButton onClick={toggleNavbar} />
-            <h1>Marketplace</h1>
+            <div className='header-title'>
+                <img src={NervaLogo} alt="NERVA" className='header-logo' />
+                <h1>NERVA Marketplace</h1>
+            </div>
             <ShoppingCartButton />
         </div>
         <NavTab isOpen={isNavbarOpen} onClose={closeNavbar} />

@@ -1,20 +1,32 @@
 .markethome-container {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    background: linear-gradient(135deg, #219de5 0%, #7682e9 100%);
     backdrop-filter: blur(4px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
     height: 60px;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 2px 8px rgba(33, 157, 229, 0.2);
     position: sticky;
     top: 0;
     z-index: 90;
 }
 
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
 .markethome-container h1 {
     color: #fff;
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     font-weight: 600;
     margin: 0;
     letter-spacing: -0.02em;

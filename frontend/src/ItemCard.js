@@ -3,7 +3,7 @@ import './listings.css';
 import { useNavigate } from 'react-router-dom';
 import NervaBadge from './nerva_badge';
 
-const ItemCard = ({ listing_id, title, imageName, price_xnv, qnty }) => {
+const ItemCard = ({ listing_id, title, imageName, price_xnv, qnty, vendor }) => {
     const imageUrl = `${process.env.REACT_APP_MARKET_MICROSERVICES}/market/listing/image/${imageName}`;
     const navigate = useNavigate();
 
@@ -11,11 +11,10 @@ const ItemCard = ({ listing_id, title, imageName, price_xnv, qnty }) => {
         <div className="item-card" onClick={() => {navigate('/listing/'+listing_id)}}>
             <img src={imageUrl} alt={title} />
             <h3>{title}</h3>
-            <div className="prices-container">
+            {vendor && <p className="card-vendor">by {vendor}</p>}
+            <div className="card-bottom">
+                <span className="card-qty">{qnty} available</span>
                 <NervaBadge price_xnv={price_xnv}/>
-            </div>
-            <div>
-                <p>Qty: {qnty}</p>
             </div>
         </div>
     );
