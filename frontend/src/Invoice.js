@@ -41,10 +41,35 @@ const PaymentDetailsCard = ({ address, amount }) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(address).then(() => {
+        // Use the modern Clipboard API when available (requires HTTPS or localhost).
+        // Fall back to a hidden textarea + execCommand for older browsers / non-secure contexts.
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(address).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            }).catch(() => {
+                fallbackCopy(address);
+            });
+        } else {
+            fallbackCopy(address);
+        }
+    };
+
+    const fallbackCopy = (text) => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-        });
+        } catch (err) {
+            console.error('Copy failed:', err);
+        }
+        document.body.removeChild(textarea);
     };
 
     return (
@@ -184,18 +209,20 @@ const Invoice = () => {
             let amount = event.data.split(",")[1];
             let confirmations = event.data.split(",")[2];
             console.log('confirmations: ' + confirmations);
-            if (confirmations == 0)
-                setTransactions(transactions => [...transactions, { 'txId': txId, 'amount': amount, 'confirmations': confirmations }]);
-            else {
-                setTransactions(prev =>
-                    prev.map(tx =>
+            setTransactions(prev => {
+                const existing = prev.find(tx => tx.txId === txId);
+                if (existing) {
+                    return prev.map(tx =>
                         tx.txId === txId
                             ? { ...tx, confirmations }
                             : tx
-                    )
-                );
-            }
-            setProgess(progress => progress + 2); // hack to jump straight to complete
+                    );
+                }
+                // Transaction not in the list yet (e.g. backend skipped the
+                // mempool event and went straight to confirmation). Add it.
+                return [...prev, { 'txId': txId, 'amount': amount, 'confirmations': confirmations }];
+            });
+            setProgess(progress => progress + 2); // jump straight to complete
         });
         socket.addEventListener('error', (event) => { console.error('WebSocket error:', event); });
         socket.addEventListener('close', () => { console.log('Disconnected from WS Server'); });
