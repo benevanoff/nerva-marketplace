@@ -1,6 +1,6 @@
 import './invoice.css'
 import NervaLogo from './nerva-coin-logo.png';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 const StatusBar = ({ progress }) => {
