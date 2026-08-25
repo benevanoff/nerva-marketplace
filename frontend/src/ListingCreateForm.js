@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import NavBar from './Navbar';
 import './listings.css'
 import './listing.css'
 
@@ -84,26 +85,45 @@ const ListingCreateForm = () => {
 
     return (
         <>
+            <NavBar />
             <div className="form-container">
+                <h2 className="form-heading">Create a Listing</h2>
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
+                    <label htmlFor="title">Title</label>
                     <input
+                        id="title"
                         type="text"
-                        placeholder="Title"
+                        placeholder="e.g. NVIDIA GT 730 GPU"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                     />
+                    <label htmlFor="description">Description</label>
                     <input
+                        id="description"
                         type="text"
-                        placeholder="Description"
+                        placeholder="Describe the item and its condition"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
+                    <label htmlFor="price">Price (XNV)</label>
                     <input
+                        id="price"
                         type="text"
-                        placeholder="Price XNV"
+                        placeholder="1.0"
                         value={price_xnv}
                         onChange={(e) => setPriceXNV(e.target.value)}
                     />
+                    <label htmlFor="quantity">Quantity Available</label>
+                    <input
+                        id="quantity"
+                        type="number"
+                        placeholder="1"
+                        value={quantity_available}
+                        onChange={(e) => setQuantityAvailable(e.target.value)}
+                        min="1"
+                        step="1"
+                    />
+                    <label htmlFor="file">Listing Image</label>
                     <input
                         type="number"
                         placeholder="Quantity Available"

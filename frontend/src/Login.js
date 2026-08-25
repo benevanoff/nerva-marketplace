@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import UserContext from './UserContext.js';
+import NervaLogo from './nerva-coin-logo.png';
 
 import './login.css'
 
@@ -40,7 +41,9 @@ const LoginCard = () => {
 
     return (
         <div className="login-card">
+            <img src={NervaLogo} alt="NERVA" className="logo" />
             <h2>Login</h2>
+            <p className="subtitle">Sign in to your marketplace account</p>
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"

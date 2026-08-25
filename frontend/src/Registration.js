@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import NervaLogo from './nerva-coin-logo.png';
 import './login.css'
 
 const RegistrationForm = () => {
@@ -37,7 +38,9 @@ const RegistrationForm = () => {
 
     return (
         <div className="login-card">
-            <h2>Register</h2>
+            <img src={NervaLogo} alt="NERVA" className="logo" />
+            <h2>Create Account</h2>
+            <p className="subtitle">Join the NERVA Marketplace</p>
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"
