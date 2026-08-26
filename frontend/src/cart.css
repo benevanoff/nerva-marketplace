@@ -138,3 +138,31 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+.cart-item-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.shipping-dropdown {
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.shipping-dropdown:hover {
+    border-color: var(--color-primary);
+}
+
+.shipping-dropdown:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(33, 157, 229, 0.12);
+}

@@ -48,7 +48,7 @@ async def get_listing_details(listing_id:int, rds_client=Depends(get_db)):
 async def get_listing_shipping_options(listing_id:int, rds_client=Depends(get_db)):
     async with rds_client.cursor() as cur:
         await cur.execute("SELECT * FROM shipping_options WHERE listing_id=%s", (listing_id))
-        listing_row = await cur.fetchone()
+        listing_row = await cur.fetchall()
     return listing_row
 
 @market_router.post("/market/listing/create")

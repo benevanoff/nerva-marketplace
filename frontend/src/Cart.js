@@ -6,6 +6,8 @@ const CartItem = ({ listing_id, onRemove }) => {
 
     const [itemDetails, setItem] = useState({"title": null, "price": 0, "image_name": ""});
     const [removing, setRemoving] = useState(false);
+    const [shippingOptions, setShippingOptions] = useState([]);
+    const [selectedShippingOption, setSelectedShippingOption] = useState('');
 
     useEffect(() => {
         const getListingDetailsRequest = async () => {
@@ -21,7 +23,25 @@ const CartItem = ({ listing_id, onRemove }) => {
             }
         };
 
+        const getShippingOptionsRequest = async () => {
+            try {
+                const response = await fetch(process.env.REACT_APP_MARKET_MICROSERVICES+'/market/listing/'+listing_id+'/shipping_options', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                // Backend returns an array of objects directly
+                if (Array.isArray(result) && result.length > 0) {
+                    setShippingOptions(result);
+                    setSelectedShippingOption(result[0].name);
+                }
+            } catch (error) {
+                console.error('Error fetching shipping options:', error);
+            }
+        };
+
         getListingDetailsRequest();
+        getShippingOptionsRequest();
     }, [listing_id]);
 
     const handleRemove = async () => {
@@ -45,9 +65,21 @@ const CartItem = ({ listing_id, onRemove }) => {
                 <h2>{itemDetails.title}</h2>
                 <p>Price: {itemDetails.price_xnv} XNV</p>
             </div>
-            <button onClick={handleRemove} disabled={removing}>
-                {removing ? 'Removing...' : 'Remove'}
-            </button>
+            <div className="cart-item-actions">
+                <select 
+                    value={selectedShippingOption}
+                    onChange={(e) => setSelectedShippingOption(e.target.value)}
+                    className="shipping-dropdown"
+                >
+                    <option value="" disabled>Select shipping option</option>
+                    {shippingOptions.map((option) => (
+                        <option key={option.id} value={option.name}>{option.name}</option>
+                    ))}
+                </select>
+                <button onClick={handleRemove} disabled={removing}>
+                    {removing ? 'Removing...' : 'Remove'}
+                </button>
+            </div>
         </div>
     </div>;
 };
