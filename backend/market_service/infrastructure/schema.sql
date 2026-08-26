@@ -51,5 +51,14 @@ CREATE TABLE order_shipping (
     id INT PRIMARY KEY AUTO_INCREMENT,
     order_id INT NOT NULL,
     shipping_note TEXT NOT NULL,
-    shipping_status enum('pending', 'shipped') DEFAULT 'pending'
+    shipping_status enum('pending', 'shipped') DEFAULT 'pending',
+    option_id INT NOT NULL
+);
+
+DROP TABLE IF EXISTS `shipping_options`;
+CREATE TABLE shipping_options (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(256) NOT NULL,
+    price_xnv DECIMAL(20,12) NOT NULL,
+    listing_id INT NOT NULL
 );
