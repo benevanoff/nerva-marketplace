@@ -44,6 +44,8 @@ async def remove_item_from_cart(listing_id:int, session_id:str=Cookie(None), ses
 
 class ShippingDetails(BaseModel):
     details: str
+    shipping_options: dict = {}
+
 @cart_router.post("/cart/shipping_details/add")
 async def add_shipping_details(request:ShippingDetails, response:Response, session_id:str=Cookie(None), session_storage=Depends(get_sessions), sql_client=Depends(get_db)):
     if not session_id:
@@ -52,6 +54,7 @@ async def add_shipping_details(request:ShippingDetails, response:Response, sessi
     if not cart_id:
         cart_id = session_storage.makeNewCartForSession(session_id)
     session_storage.updateCartShippingData(session_id, request.details)
+    session_storage.updateCartShippingOptions(session_id, request.shipping_options)
     return 200
 
 @cart_router.post("/cart/checkout")
@@ -64,6 +67,7 @@ async def checkout(session_id:str=Cookie(None), session_storage=Depends(get_sess
     shipping_data = cart.get("shipping_data")
     if not shipping_data:
         return 300
+    shipping_options = cart.get("shipping_options", {})
     # get the total cost of the cart
     async with sql_client.cursor() as cur:
         # get the total value of the cart
@@ -92,7 +96,13 @@ async def checkout(session_id:str=Cookie(None), session_storage=Depends(get_sess
         order_id = cur.lastrowid
         for order_item in cart["items"]:
             await cur.execute("INSERT INTO order_items (order_id, item_listing_id) VALUES (%s,%s)", (order_id, order_item))
-        await cur.execute("INSERT INTO order_shipping (order_id, shipping_note) VALUES (%s, %s)", (order_id, shipping_data))
+            # Get the shipping option ID for this item
+            option_id = shipping_options.get(str(order_item))
+            if option_id:
+                await cur.execute("INSERT INTO order_shipping (order_id, shipping_note, option_id) VALUES (%s, %s, %s)", (order_id, shipping_data, option_id))
+            else:
+                # If no option selected, use a default or handle error - TODO: revisit this
+                await cur.execute("INSERT INTO order_shipping (order_id, shipping_note, option_id) VALUES (%s, %s, %s)", (order_id, shipping_data, 0))
         # decrement the quantity available
         await cur.execute("UPDATE listings SET quantity_available=quantity_available-1 WHERE listing_id IN (SELECT item_listing_id as listing_id FROM order_items WHERE order_id=%s)", (order_id))
     return invoice_create_response.json()

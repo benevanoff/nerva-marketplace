@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './cart.css'
 
-const CartItem = ({ listing_id, onRemove }) => {
+const CartItem = ({ listing_id, onRemove, onShippingOptionChange }) => {
 
     const [itemDetails, setItem] = useState({"title": null, "price": 0, "image_name": ""});
     const [removing, setRemoving] = useState(false);
@@ -33,7 +33,11 @@ const CartItem = ({ listing_id, onRemove }) => {
                 // Backend returns an array of objects directly
                 if (Array.isArray(result) && result.length > 0) {
                     setShippingOptions(result);
-                    setSelectedShippingOption(result[0].name);
+                    const firstOption = result[0];
+                    setSelectedShippingOption(firstOption.id);
+                    if (onShippingOptionChange) {
+                        onShippingOptionChange(listing_id, firstOption);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching shipping options:', error);
@@ -68,12 +72,19 @@ const CartItem = ({ listing_id, onRemove }) => {
             <div className="cart-item-actions">
                 <select 
                     value={selectedShippingOption}
-                    onChange={(e) => setSelectedShippingOption(e.target.value)}
+                    onChange={(e) => {
+                        const optionId = parseInt(e.target.value);
+                        setSelectedShippingOption(optionId);
+                        const selectedOption = shippingOptions.find(opt => opt.id === optionId);
+                        if (selectedOption && onShippingOptionChange) {
+                            onShippingOptionChange(listing_id, selectedOption);
+                        }
+                    }}
                     className="shipping-dropdown"
                 >
                     <option value="" disabled>Select shipping option</option>
                     {shippingOptions.map((option) => (
-                        <option key={option.id} value={option.name}>{option.name}</option>
+                        <option key={option.id} value={option.id}>{option.name} - {option.price_xnv} XNV</option>
                     ))}
                 </select>
                 <button onClick={handleRemove} disabled={removing}>
@@ -88,6 +99,7 @@ const Cart = () => {
     const [cartDetails, setCartDetails] = useState(null);
     const [shippingDetails, setShippingDetails] = useState('');
     const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [shippingSelections, setShippingSelections] = useState({});
     const navigate = useNavigate();
 
     const fetchCart = async () => {
@@ -111,6 +123,13 @@ const Cart = () => {
         fetchCart();
     };
 
+    const handleShippingOptionChange = (listing_id, option) => {
+        setShippingSelections(prev => ({
+            ...prev,
+            [listing_id]: option.id
+        }));
+    };
+
     const postShippingDetailsRequest = async () => {
         try {
             const response = await fetch(process.env.REACT_APP_MARKET_MICROSERVICES + '/cart/shipping_details/add', {
@@ -119,7 +138,10 @@ const Cart = () => {
                     'Content-Type': 'application/json'
                 },
                 credentials: 'include',
-                body: JSON.stringify({ details: shippingDetails })
+                body: JSON.stringify({ 
+                    details: shippingDetails,
+                    shipping_options: shippingSelections
+                })
             });
             if (!response.ok) {
                 throw new Error('Failed to add shipping details');
@@ -157,7 +179,7 @@ const Cart = () => {
     if (cartDetails && cartDetails.items !== undefined && cartDetails.items.length > 0) {
         return <div className="cart-container">
             {cartDetails.items.map((id, index) => (
-                    <CartItem key={`${id}-${index}`} listing_id={id} onRemove={handleRemoveItem} />
+                    <CartItem key={`${id}-${index}`} listing_id={id} onRemove={handleRemoveItem} onShippingOptionChange={handleShippingOptionChange} />
                 ))}
             <div className="shipping-details-section">
                 <h3>Shipping Details</h3>
