@@ -7,6 +7,8 @@ const VendorOrderDetail = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [updateLoading, setUpdateLoading] = useState(false);
+    const [updateError, setUpdateError] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -47,6 +49,48 @@ const VendorOrderDetail = () => {
 
         getOrderDetail();
     }, [order_id, navigate]);
+
+    const handleShippingStatusUpdate = async () => {
+        setUpdateLoading(true);
+        setUpdateError(null);
+        
+        try {
+            const response = await fetch(
+                `${process.env.REACT_APP_MARKET_MICROSERVICES}/vendor/orders/${order_id}/shipping/status`,
+                {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'shipped' })
+                }
+            );
+
+            if (response.status === 401 || response.status === 422) {
+                navigate('/login');
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to update shipping status');
+            }
+
+            const result = await response.json();
+            setOrder(prev => ({
+                ...prev,
+                shipping: {
+                    ...prev.shipping,
+                    status: result.shipping_status
+                }
+            }));
+        } catch (error) {
+            console.error('Error:', error);
+            setUpdateError(error.message);
+        } finally {
+            setUpdateLoading(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -155,6 +199,18 @@ const VendorOrderDetail = () => {
                                 {order.shipping.status || 'Pending'}
                             </span>
                         </div>
+                        {order.shipping.status === 'pending' && (
+                            <div className="shipping-action">
+                                {updateError && <p className="error">{updateError}</p>}
+                                <button 
+                                    className="update-status-button"
+                                    onClick={handleShippingStatusUpdate}
+                                    disabled={updateLoading}
+                                >
+                                    {updateLoading ? 'Updating...' : 'Mark as Shipped'}
+                                </button>
+                            </div>
+                        )}
                         <div className="shipping-item">
                             <span className="label">Shipping Note:</span>
                             <p className="shipping-note">{order.shipping.note || 'No shipping note provided'}</p>

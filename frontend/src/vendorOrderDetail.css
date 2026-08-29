@@ -253,3 +253,32 @@
     border: 1px solid #fecaca;
     margin-bottom: 1rem;
 }
+
+.shipping-action {
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: #fffbeb;
+}
+
+.update-status-button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #fbbf24;
+    border: 1px solid #f59e0b;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #78350f;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.update-status-button:hover:not(:disabled) {
+    background-color: #f59e0b;
+}
+
+.update-status-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

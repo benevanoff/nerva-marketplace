@@ -118,3 +118,35 @@ async def get_vendor_order_detail(order_id: int, session_id:str=Cookie(None), se
                 "status": shipping['shipping_status'] if shipping else None
             }
         }
+
+class ShippingStatusUpdate(BaseModel):
+    status: str
+@orders_router.put("/vendor/orders/{order_id}/shipping/status")
+async def update_vendor_order_shipping_status(
+    order_id: int, 
+    status_update: ShippingStatusUpdate,
+    session_id:str=Cookie(None), 
+    session_storage=Depends(get_sessions), 
+    sql_client=Depends(get_db)
+):
+    if not session_id:
+        raise HTTPException(status_code=401)
+    username = session_storage.getUserFromSession(session_id)
+    if not username:
+        raise HTTPException(status_code=422)
+    
+    async with sql_client.cursor() as cur:
+        # Verify the order belongs to this vendor
+        await cur.execute("SELECT * FROM orders WHERE order_id=%s AND vendor=%s", (order_id, username))
+        order = await cur.fetchone()
+        
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        
+        # Update the shipping status
+        await cur.execute(
+            "UPDATE order_shipping SET shipping_status=%s WHERE order_id=%s",
+            (status_update.status, order_id)
+        )
+    
+    return {"success": True, "shipping_status": status_update.status}
