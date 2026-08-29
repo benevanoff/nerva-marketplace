@@ -5,7 +5,7 @@ import logging
 from pydantic import BaseModel
 from typing import Optional
 from fastapi import APIRouter
-from fastapi import FastAPI, Request, Depends, HTTPException, Response, Cookie, File, UploadFile, Form
+from fastapi import FastAPI, Request, Depends, HTTPException, Response, Cookie, File, UploadFile, Form, Query
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -13,6 +13,22 @@ from starlette.middleware.sessions import SessionMiddleware
 from .dependencies import get_db, get_sessions
 
 market_router = APIRouter()
+
+# Sort columns allowed by the GET /market/listings endpoint.
+# Maps the frontend sort keys to actual column names so users can't
+# inject arbitrary SQL via the sort_by parameter.
+SORT_COLUMNS = {
+    "newest": "create_time",
+    "price-low": "price_xnv",
+    "price-high": "price_xnv",
+    "name": "title",
+}
+SORT_DIRECTIONS = {
+    "newest": "DESC",
+    "price-low": "ASC",
+    "price-high": "DESC",
+    "name": "ASC",
+}
 
 class ListingStorage:
 
@@ -31,11 +47,47 @@ class ListingStorage:
 
 
 @market_router.get("/market/listings")
-async def get_listings(rds_client=Depends(get_db)):
+async def get_listings(
+    page: int = Query(1, ge=1, description="Page number, starting at 1"),
+    per_page: int = Query(20, ge=1, le=100, description="Items per page (1-100)"),
+    search: Optional[str] = Query(None, description="Search term for title, description, or vendor"),
+    sort_by: str = Query("newest", description="Sort key: newest, price-low, price-high, name"),
+    rds_client=Depends(get_db),
+):
+    # Validate sort_by to prevent SQL injection — only allow known keys.
+    if sort_by not in SORT_COLUMNS:
+        sort_by = "newest"
+    sort_column = SORT_COLUMNS[sort_by]
+    sort_direction = SORT_DIRECTIONS[sort_by]
+
+    # Build the query. Only return listings with stock available.
+    where_clause = "WHERE quantity_available > 0"
+    params = []
+
+    if search:
+        where_clause += " AND (title LIKE %s OR description LIKE %s OR vendor LIKE %s)"
+        like_term = f"%{search}%"
+        params.extend([like_term, like_term, like_term])
+
+    # Count total matching rows for the frontend to know how many pages there are.
     async with rds_client.cursor() as cur:
-        await cur.execute("SELECT * FROM listings LIMIT 20")
+        await cur.execute(f"SELECT COUNT(*) as total FROM listings {where_clause}", params)
+        count_row = await cur.fetchone()
+        total = count_row["total"] if count_row else 0
+
+        # Fetch the requested page.
+        offset = (page - 1) * per_page
+        query = f"SELECT * FROM listings {where_clause} ORDER BY {sort_column} {sort_direction} LIMIT %s OFFSET %s"
+        await cur.execute(query, params + [per_page, offset])
         listing_rows = await cur.fetchall()
-    return listing_rows
+
+    return {
+        "listings": listing_rows,
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "total_pages": (total + per_page - 1) // per_page if per_page > 0 else 0,
+    }
 
 @market_router.get("/market/listing/{listing_id}")
 async def get_listing_details(listing_id:int, rds_client=Depends(get_db)):

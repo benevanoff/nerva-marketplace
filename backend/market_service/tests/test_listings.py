@@ -38,7 +38,9 @@ class TestListingsAPIs(unittest.TestCase):
             # get listings - there should be none yet
             response = session.get(f'{self.test_host}/market/listings')
             assert response.status_code == 200
-            assert response.json() == []
+            response_json = response.json()
+            assert response_json["listings"] == []
+            assert response_json["total"] == 0
             # try to create a listing - should fail because not logged in
             response = session.post(f'{self.test_host}/market/listing/create', data=self.simple_form_data["form_text"], files=self.simple_form_data["form_file"])
             assert response.status_code == 401
@@ -53,7 +55,9 @@ class TestListingsAPIs(unittest.TestCase):
             # get listings - there should be none yet
             response = session.get(f'{self.test_host}/market/listings')
             assert response.status_code == 200
-            assert response.json() == []
+            response_json = response.json()
+            assert response_json["listings"] == []
+            assert response_json["total"] == 0
             # now create a listing
             response = session.post(f'{self.test_host}/market/listing/create', data=self.simple_form_data["form_text"], files=self.simple_form_data["form_file"])
             assert response.status_code == 200
@@ -61,14 +65,17 @@ class TestListingsAPIs(unittest.TestCase):
             response = session.get(f'{self.test_host}/market/listings')
             assert response.status_code == 200
             response_json = response.json()
-            assert len(response_json) == 1
-            assert response_json[0]["vendor"] == TestUserAPIs.test_username
-            assert response_json[0]["title"] == "Test Listing"
-            assert response_json[0]["description"] == "This is an example description"
-            assert ".png" in response_json[0]["image_name"]
-            assert response_json[0]["price_xnv"] == 3
-            assert response_json[0]["quantity_available"] == 5
-            test_listing_id = response_json[0]["listing_id"]
+            assert response_json["total"] == 1
+            assert response_json["total_pages"] == 1
+            listings = response_json["listings"]
+            assert len(listings) == 1
+            assert listings[0]["vendor"] == TestUserAPIs.test_username
+            assert listings[0]["title"] == "Test Listing"
+            assert listings[0]["description"] == "This is an example description"
+            assert ".png" in listings[0]["image_name"]
+            assert listings[0]["price_xnv"] == 3
+            assert listings[0]["quantity_available"] == 5
+            test_listing_id = listings[0]["listing_id"]
             # get the test listing details by ID
             response = session.get(f'{self.test_host}/market/listing/{test_listing_id}')
             response.status_code == 200
@@ -89,8 +96,10 @@ class TestListingsAPIs(unittest.TestCase):
             assert response.status_code == 200
             response = session.get(f'{self.test_host}/market/listings')
             response_json = response.json()
-            assert len(response_json) == 2
-            default_qty_listing = next(l for l in response_json if l["title"] == "Test Listing 2")
+            assert response_json["total"] == 2
+            listings = response_json["listings"]
+            assert len(listings) == 2
+            default_qty_listing = next(l for l in listings if l["title"] == "Test Listing 2")
             assert default_qty_listing["quantity_available"] == 1
             # try to create a listing with an invalid quantity - should be rejected
             form_text_bad_qty = {
@@ -101,6 +110,49 @@ class TestListingsAPIs(unittest.TestCase):
             }
             response = session.post(f'{self.test_host}/market/listing/create', data=form_text_bad_qty, files={'file': open('tests/test.png', 'rb')})
             assert response.status_code == 422
+
+    def test_listings_pagination_and_search(self):
+        create_test_user()
+        with requests.Session() as session:
+            response = session.post(f'{self.test_host}/users/login', json={"username": TestUserAPIs.test_username, "password": TestUserAPIs.test_password})
+            assert response.status_code == 200
+            # create 3 listings with distinct titles
+            for i in range(3):
+                form = {
+                    'title': f'SearchTest Listing {i}',
+                    'description': 'desc',
+                    'price_xnv': i + 1,
+                    'quantity_available': 1
+                }
+                response = session.post(f'{self.test_host}/market/listing/create', data=form, files={'file': open('tests/test.png', 'rb')})
+                assert response.status_code == 200
+            # test pagination: per_page=2 should return 2 items on page 1
+            response = session.get(f'{self.test_host}/market/listings?per_page=2&page=1')
+            assert response.status_code == 200
+            data = response.json()
+            assert len(data["listings"]) == 2
+            assert data["total"] >= 3
+            assert data["page"] == 1
+            # page 2 should return the remaining
+            response = session.get(f'{self.test_host}/market/listings?per_page=2&page=2')
+            data = response.json()
+            assert data["page"] == 2
+            # test search: should only return matching listings
+            response = session.get(f'{self.test_host}/market/listings?search=SearchTest')
+            data = response.json()
+            for l in data["listings"]:
+                assert 'SearchTest' in l['title']
+            assert data["total"] == 3
+            # test sort by price ascending
+            response = session.get(f'{self.test_host}/market/listings?search=SearchTest&sort_by=price-low')
+            data = response.json()
+            prices = [l["price_xnv"] for l in data["listings"]]
+            assert prices == sorted(prices)
+            # test sort by price descending
+            response = session.get(f'{self.test_host}/market/listings?search=SearchTest&sort_by=price-high')
+            data = response.json()
+            prices = [l["price_xnv"] for l in data["listings"]]
+            assert prices == sorted(prices, reverse=True)
 
 def create_test_listing():
     # make sure test user is in db
