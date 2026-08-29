@@ -76,7 +76,22 @@ async def checkout(session_id:str=Cookie(None), session_storage=Depends(get_sess
         for item in cart["items"]:
             await cur.execute("SELECT vendor, price_xnv, quantity_available FROM listings WHERE listing_id = %s", (item))
             listing_record = await cur.fetchone()
+            # add item price
             cart_total += float((listing_record)["price_xnv"])
+            # if a shipping option was selected for this item, add its price
+            option_id = None
+            # shipping_options keys may be strings (from JSON) or ints
+            if str(item) in shipping_options:
+                option_id = shipping_options.get(str(item))
+            else:
+                option_id = shipping_options.get(item)
+            # todo - tell the user nicely that they need to choose a shipping method
+            assert option_id
+
+            await cur.execute("SELECT price_xnv FROM shipping_options WHERE id=%s", (option_id,))
+            opt_row = await cur.fetchone()
+            if opt_row and opt_row.get("price_xnv") is not None:
+                cart_total += float(opt_row["price_xnv"])
             # for now, assert that all order items in a listing come from the same vendor
             if not vendor_username:
                 vendor_username = listing_record["vendor"]
