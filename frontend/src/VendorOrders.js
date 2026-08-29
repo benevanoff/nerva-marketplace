@@ -55,21 +55,29 @@ const VendorOrders = () => {
         <div className="vendor-orders-container">
             <h1>Vendor Orders</h1>
             <div className="orders-list">
-                {orders.map((order, index) => (
-                    <div 
-                        key={`${order.order_id}-${index}`} 
-                        className="order-item"
-                        onClick={() => navigate(`/vendor/orders/${order.order_id}`)}
-                        style={{ cursor: 'pointer' }}
-                    >
-                        <span className="order-id">Order ID: {order.order_id}</span>
-                        <span className="order-date">Date: {order.create_time}</span>
-                        <span className="order-amount">Amount: {order.amount} XNV</span>
-                        <span className={`order-status status-${order.status.toLowerCase()}`}>
-                            Status: {order.status}
-                        </span>
-                    </div>
-                ))}
+                {orders.map((order, index) => {
+                    const paymentStatusClass = `status-${String(order.status || '').toLowerCase().replace(/\s+/g, '-')}`;
+                    const shippingStatusClass = `status-${String(order.shipping_status || 'pending').toLowerCase().replace(/\s+/g, '-')}`;
+
+                    return (
+                        <div 
+                            key={`${order.order_id}-${index}`} 
+                            className="order-item"
+                            onClick={() => navigate(`/vendor/orders/${order.order_id}`)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <span className="order-id">Order ID: {order.order_id}</span>
+                            <span className="order-date">Date: {order.create_time}</span>
+                            <span className="order-amount">Amount: {order.amount} XNV</span>
+                            <span className={`order-status ${paymentStatusClass}`}>
+                                Payment Status: {order.status}
+                            </span>
+                            <span className={`order-status ${shippingStatusClass}`}>
+                                Shipment Status: {order.shipping_status || 'Pending'}
+                            </span>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
