@@ -57,6 +57,8 @@ async def create_listing(session_id:str=Cookie(None), session_storage=Depends(ge
                          title: str = Form(...), description: str = Form(...),
                          price_xnv: float = Form(...),
                          quantity_available: int = Form(1),
+                         shipping_option_name: str = Form(...),
+                         shipping_option_price: float = Form(...),
                          file: Optional[UploadFile] = File(None)):
     # We need a valid session_id
     if not session_id:
@@ -66,6 +68,12 @@ async def create_listing(session_id:str=Cookie(None), session_storage=Depends(ge
     # enforce a positive integer quantity
     if quantity_available < 1:
         raise HTTPException(status_code=422, detail="quantity_available must be at least 1")
+    # enforce positive shipping option price
+    if shipping_option_price < 0:
+        raise HTTPException(status_code=422, detail="shipping_option_price must be non-negative")
+    # enforce shipping option name is not empty
+    if not shipping_option_name or not shipping_option_name.strip():
+        raise HTTPException(status_code=422, detail="shipping_option_name cannot be empty")
     # enfore a max file size
     if file.size > ListingStorage.MAX_FILE_SIZE:
         raise HTTPException(status_code=422, detail="File too big")
@@ -89,6 +97,15 @@ async def create_listing(session_id:str=Cookie(None), session_storage=Depends(ge
             VALUES
                 (%s, %s, %s, %s, %s, %s)
             """, (title, description, f'{img_id}.{file_type}', price_xnv, username, quantity_available))
+        # Get the listing_id that was just created
+        listing_id = cur.lastrowid
+        # Insert the shipping option for this listing
+        await cur.execute("""
+            INSERT INTO shipping_options
+                (name, price_xnv, listing_id)
+            VALUES
+                (%s, %s, %s)
+            """, (shipping_option_name, shipping_option_price, listing_id))
 
 @market_router.get("/market/listing/image/{image_name}")
 async def get_image(image_name:str, rds_client=Depends(get_db)):

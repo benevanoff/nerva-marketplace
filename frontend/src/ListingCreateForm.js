@@ -8,6 +8,8 @@ const ListingCreateForm = () => {
     const [description, setDescription] = useState('');
     const [price_xnv, setPriceXNV] = useState('');
     const [quantity_available, setQuantityAvailable] = useState('1');
+    const [shipping_option_name, setShippingOptionName] = useState('');
+    const [shipping_option_price, setShippingOptionPrice] = useState('');
     const [img_file, setIMGFile] = useState(null);
     const [filePreview, setFilePreview] = useState(null);
     const [submitting, setSubmitting] = useState(false);
@@ -25,6 +27,8 @@ const ListingCreateForm = () => {
         formData.append('description', description);
         formData.append('price_xnv', price_xnv);
         formData.append('quantity_available', quantity_available);
+        formData.append('shipping_option_name', shipping_option_name);
+        formData.append('shipping_option_price', shipping_option_price);
         if (img_file) {
             formData.append('file', img_file);
         }
@@ -40,6 +44,8 @@ const ListingCreateForm = () => {
                 // Clear the form so it's fresh if the user creates another listing
                 setTitle('');
                 setDescription('');
+                setShippingOptionName('');
+                setShippingOptionPrice('');
                 setPriceXNV('');
                 setQuantityAvailable('1');
                 setIMGFile(null);
@@ -113,6 +119,18 @@ const ListingCreateForm = () => {
                         onChange={(e) => setQuantityAvailable(e.target.value)}
                         min="1"
                         step="1"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Shipping Option Name"
+                        value={shipping_option_name}
+                        onChange={(e) => setShippingOptionName(e.target.value)}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Shipping Option Price XNV"
+                        value={shipping_option_price}
+                        onChange={(e) => setShippingOptionPrice(e.target.value)}
                     />
                     <input
                         type="file"
