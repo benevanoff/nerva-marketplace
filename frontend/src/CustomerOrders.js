@@ -59,7 +59,13 @@ const CustomerOrders = () => {
                     const shippingStatusClass = `status-${String(order.shipping_status || '').toLowerCase().replace(/\s+/g, '-')}`;
 
                     return (
-                        <span key={`${order.order_id}-${index}`} className="order-item">
+                        <button
+                            key={`${order.order_id}-${index}`}
+                            className="order-item order-link"
+                            type="button"
+                            onClick={() => navigate(`/customer/orders/${order.order_id}`)}
+                            style={{ textAlign: 'left', cursor: 'pointer', border: 'none', background: 'transparent', padding: 0 }}
+                        >
                             <span className="order-id">Order ID: {order.order_id}</span>
                             <span className="order-date">Date: {order.create_time}</span>
                             <span className={`order-status ${statusClass}`}>
@@ -68,7 +74,7 @@ const CustomerOrders = () => {
                             <span className={`order-status ${shippingStatusClass}`}>
                                 Shipping Status: {order.shipping_status}
                             </span>
-                        </span>
+                        </button>
                     );
                 })}
             </div>

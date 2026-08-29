@@ -132,6 +132,66 @@ async def get_vendor_order_detail(order_id: int, session_id:str=Cookie(None), se
             }
         }
 
+
+@orders_router.get("/customer/orders/{order_id}")
+async def get_customer_order_detail(order_id: int, session_id:str=Cookie(None), session_storage=Depends(get_sessions), sql_client=Depends(get_db),):
+    if not session_id:
+        raise HTTPException(status_code=401)
+    username = session_storage.getUserFromSession(session_id)
+    if not username:
+        raise HTTPException(status_code=422)
+
+    async with sql_client.cursor() as cur:
+        # Get order details for this buyer
+        await cur.execute("SELECT * FROM orders WHERE order_id=%s AND buyer=%s", (order_id, username))
+        order = await cur.fetchone()
+
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        # Get order items with listing details
+        await cur.execute("""
+            SELECT oi.item_listing_id, l.title, l.price_xnv, l.image_name, COUNT(*) as quantity
+            FROM order_items oi
+            JOIN listings l ON oi.item_listing_id = l.listing_id
+            WHERE oi.order_id=%s
+            GROUP BY oi.item_listing_id, l.title, l.price_xnv, l.image_name
+        """, (order_id,))
+        items = await cur.fetchall()
+
+        # Get shipping details
+        await cur.execute("SELECT shipping_note, shipping_status FROM order_shipping WHERE order_id=%s", (order_id,))
+        shipping = await cur.fetchone()
+
+        # Get invoice details
+        order_invoice_details = requests.get(f"{settings.PAYMENTS_BASE_URL}/invoice/{order['invoice_id']}")
+        invoice_data = order_invoice_details.json()
+
+        return {
+            "order_id": order['order_id'],
+            "create_time": order['create_time'].strftime("%Y-%m-%d %H:%M:%S"),
+            "invoice_status": invoice_data.get('status'),
+            "amount": invoice_data.get('amount'),
+            "recipient_name": order.get('recipient_name') or username,
+            "customer_username": username,
+            "customer_email": None,
+            "items": [
+                {
+                    "listing_id": item['item_listing_id'],
+                    "title": item['title'],
+                    "price_xnv": float(item['price_xnv']),
+                    "image_name": item['image_name'],
+                    "quantity": item['quantity']
+                }
+                for item in items
+            ],
+            "shipping": {
+                "note": shipping['shipping_note'] if shipping else None,
+                "status": shipping['shipping_status'] if shipping else None
+            },
+            "shipping_status": shipping['shipping_status'] if shipping else None
+        }
+
 class ShippingStatusUpdate(BaseModel):
     status: str
 @orders_router.put("/vendor/orders/{order_id}/shipping/status")

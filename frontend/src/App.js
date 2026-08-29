@@ -16,6 +16,7 @@ import Listing from "./Listing.js"
 import VendorOrders from "./VendorOrders.js"
 import VendorOrderDetail from "./VendorOrderDetail.js"
 import CustomerOrders from "./CustomerOrders.js"
+import CustomerOrderDetail from "./CustomerOrderDetail.js"
 import { UserProvider } from './UserContext.js';
 
 const Home = () => {
@@ -39,6 +40,7 @@ function App() {
               <Route path="/invoice/:invoice_id" element={<Invoice/>} />
               <Route path="/vendor/orders" element={<VendorOrders/>} />
               <Route path="/vendor/orders/:order_id" element={<VendorOrderDetail/>} />
+              <Route path="/customer/orders/:order_id" element={<CustomerOrderDetail/>} />
               <Route path="/customer/orders" element={<CustomerOrders/>} />
               <Route path="/" element={<Home />} />
             </Routes>
