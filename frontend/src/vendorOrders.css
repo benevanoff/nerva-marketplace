@@ -29,6 +29,15 @@
     transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
+.order-link {
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
 .order-item:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-1px);

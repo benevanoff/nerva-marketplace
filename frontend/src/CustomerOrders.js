@@ -64,7 +64,6 @@ const CustomerOrders = () => {
                             className="order-item order-link"
                             type="button"
                             onClick={() => navigate(`/customer/orders/${order.order_id}`)}
-                            style={{ textAlign: 'left', cursor: 'pointer', border: 'none', background: 'transparent', padding: 0 }}
                         >
                             <span className="order-id">Order ID: {order.order_id}</span>
                             <span className="order-date">Date: {order.create_time}</span>
