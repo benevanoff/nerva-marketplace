@@ -33,7 +33,7 @@ class ListingStorage:
 @market_router.get("/market/listings")
 async def get_listings(rds_client=Depends(get_db)):
     async with rds_client.cursor() as cur:
-        await cur.execute("SELECT * FROM listings LIMIT 20")
+        await cur.execute("SELECT * FROM listings ORDER BY listing_id DESC LIMIT 20")
         listing_rows = await cur.fetchall()
     return listing_rows
 
