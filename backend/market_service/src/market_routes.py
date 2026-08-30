@@ -1,10 +1,12 @@
 import os
+import io
 import uuid
 import imghdr
 import logging
 from pydantic import BaseModel
 from typing import Optional
 from fastapi import APIRouter
+from PIL import Image, ImageOps
 from fastapi import FastAPI, Request, Depends, HTTPException, Response, Cookie, File, UploadFile, Form
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,12 +23,24 @@ class ListingStorage:
 
     def __init__(self):
         self.storage_root = f'{os.getcwd()}/listing_image_storage'
+        # Ensure the storage directory exists
+        os.makedirs(self.storage_root, exist_ok=True)
 
-    async def addFile(self, file:UploadFile, filetype:str):
+    async def addFile(self, file: UploadFile, filetype: str):
         assert file.size < self.MAX_FILE_SIZE
         img_id = str(uuid.uuid4())
-        with open(f'{self.storage_root}/{img_id}.{filetype}', 'wb') as local_file:
-            local_file.write(await file.read())
+        
+        file_bytes = await file.read()
+        image_stream = io.BytesIO(file_bytes)
+        output_path = f'{self.storage_root}/{img_id}.{filetype}'
+        # process image with Pillow to drop metadata
+        with Image.open(image_stream) as img:
+            # before dropping the EXIF container so photos don't end up sideways.
+            if filetype in ["jpg", "jpeg"]:
+                img = ImageOps.exif_transpose(img)
+            # save the image while explicitly stripping metadata
+            img.save(output_path, format=img.format, exif=b"", pnginfo=None)
+            
         return img_id
 
 
