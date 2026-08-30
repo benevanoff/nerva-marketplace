@@ -18,7 +18,9 @@ import VendorOrderDetail from "./VendorOrderDetail.js"
 import CustomerOrders from "./CustomerOrders.js"
 import CustomerOrderDetail from "./CustomerOrderDetail.js"
 import UserProfile from "./UserProfile.js"
+import Favorites from "./Favorites.js"
 import { UserProvider } from './UserContext.js';
+import { FavoritesProvider } from './FavoritesContext.js';
 
 const Home = () => {
   return <ListingsDisplay/>
@@ -27,6 +29,7 @@ const Home = () => {
 function App() {
   return (
     <UserProvider>
+      <FavoritesProvider>
       <Router>
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1 }}>
@@ -39,6 +42,7 @@ function App() {
               <Route path="/listing/:listing_id" element={<Listing/>} />
               <Route path="/user/:user_id" element={<UserProfile/>} />
               <Route path="/cart" element={<Cart/>} />
+              <Route path="/favorites" element={<Favorites/>} />
               <Route path="/invoice/:invoice_id" element={<Invoice/>} />
               <Route path="/vendor/orders" element={<VendorOrders/>} />
               <Route path="/vendor/orders/:order_id" element={<VendorOrderDetail/>} />
@@ -66,6 +70,7 @@ function App() {
           </footer>
         </div>
       </Router>
+      </FavoritesProvider>
     </UserProvider>
   );
 }
