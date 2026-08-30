@@ -19,6 +19,7 @@ import CustomerOrders from "./CustomerOrders.js"
 import CustomerOrderDetail from "./CustomerOrderDetail.js"
 import UserProfile from "./UserProfile.js"
 import { UserProvider } from './UserContext.js';
+import { ToastProvider } from './ToastContext.js';
 
 const Home = () => {
   return <ListingsDisplay/>
@@ -27,6 +28,7 @@ const Home = () => {
 function App() {
   return (
     <UserProvider>
+      <ToastProvider>
       <Router>
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1 }}>
@@ -66,6 +68,7 @@ function App() {
           </footer>
         </div>
       </Router>
+      </ToastProvider>
     </UserProvider>
   );
 }
