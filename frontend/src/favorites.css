@@ -1,0 +1,106 @@
+/* heart button on listing cards (item-card gets position: relative in listings.css) */
+
+.favorite-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.favorite-button:hover {
+    transform: scale(1.1);
+    color: var(--color-danger);
+}
+
+.favorite-button.active {
+    color: var(--color-danger);
+}
+
+.favorite-button.active svg {
+    animation: heart-pop 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes heart-pop {
+    0% {
+        transform: scale(0.6);
+    }
+    60% {
+        transform: scale(1.25);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ---------- favorites page ---------- */
+
+.favorites-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+}
+
+.favorites-page h1 {
+    margin: 0 0 8px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.favorites-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.favorites-empty svg {
+    color: var(--color-border);
+    margin-bottom: 8px;
+}
+
+.favorites-empty h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.favorites-empty p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.favorites-empty button {
+    margin-top: 16px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.favorites-empty button:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
