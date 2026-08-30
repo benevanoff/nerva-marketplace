@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './cart.css'
+import { CartSkeleton } from './Skeletons';
 
 const CartItem = ({ listing_id, onRemove, onShippingOptionChange }) => {
 
@@ -97,6 +98,7 @@ const CartItem = ({ listing_id, onRemove, onShippingOptionChange }) => {
 
 const Cart = () => {
     const [cartDetails, setCartDetails] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [shippingDetails, setShippingDetails] = useState('');
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const [shippingSelections, setShippingSelections] = useState({});
@@ -112,6 +114,8 @@ const Cart = () => {
             setCartDetails(result);
         } catch (error) {
             console.error('Error:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -175,6 +179,10 @@ const Cart = () => {
             setIsCheckingOut(false);
         }
     };
+
+    if (isLoading) {
+        return <CartSkeleton />;
+    }
 
     if (cartDetails && cartDetails.items !== undefined && cartDetails.items.length > 0) {
         return <div className="cart-container">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './listings.css';
 import { useNavigate } from 'react-router-dom';
 import NervaBadge from './nerva_badge';
@@ -6,10 +6,22 @@ import NervaBadge from './nerva_badge';
 const ItemCard = ({ listing_id, title, imageName, price_xnv, qnty }) => {
     const imageUrl = `${process.env.REACT_APP_MARKET_MICROSERVICES}/market/listing/image/${imageName}`;
     const navigate = useNavigate();
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+    // reveal the image once it is decoded, and never leave it stuck
+    // invisible if the file fails to load
+    const markImageReady = () => setImageLoaded(true);
 
     return (
         <div className="item-card" onClick={() => {navigate('/listing/'+listing_id)}}>
-            <img src={imageUrl} alt={title} />
+            <img
+                src={imageUrl}
+                alt={title}
+                loading="lazy"
+                onLoad={markImageReady}
+                onError={markImageReady}
+                className={`img-fade ${imageLoaded ? 'loaded' : ''}`}
+            />
             <h3>{title}</h3>
             <div className="prices-container">
                 <NervaBadge price_xnv={price_xnv}/>
