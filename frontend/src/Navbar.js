@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ShoppingCartButton.css';
 import './Navbar.css';
+import './command-palette.css';
 import UserContext from './UserContext';
 
 const ShoppingCartButton = () => {
@@ -73,6 +74,22 @@ const NavTab = ({ isOpen, onClose }) => {
     );
 };
 
+const PaletteTriggerButton = () => {
+    const openPalette = () => {
+        window.dispatchEvent(new Event('nerva-open-palette'));
+    };
+    return (
+        <button className="palette-trigger" onClick={openPalette} aria-label="Open quick navigation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Search</span>
+            <kbd style={{ fontSize: '0.7rem', opacity: 0.8 }}>ctrl K</kbd>
+        </button>
+    );
+};
+
 const NavBar = () => {
     const [isNavbarOpen, setIsNavbarOpen] = useState(false);
     const toggleNavbar = () => {
@@ -85,6 +102,7 @@ const NavBar = () => {
         <div className='markethome-container'>
             <NavButton onClick={toggleNavbar} />
             <h1>Marketplace</h1>
+            <PaletteTriggerButton />
             <ShoppingCartButton />
         </div>
         <NavTab isOpen={isNavbarOpen} onClose={closeNavbar} />

@@ -18,6 +18,7 @@ import VendorOrderDetail from "./VendorOrderDetail.js"
 import CustomerOrders from "./CustomerOrders.js"
 import CustomerOrderDetail from "./CustomerOrderDetail.js"
 import UserProfile from "./UserProfile.js"
+import CommandPalette from "./CommandPalette.js"
 import { UserProvider } from './UserContext.js';
 
 const Home = () => {
@@ -28,6 +29,7 @@ function App() {
   return (
     <UserProvider>
       <Router>
+        <CommandPalette />
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1 }}>
             <Routes>
