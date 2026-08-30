@@ -68,7 +68,7 @@ const Listing = () => {
                     </div>
                     <div className='detail-choices-bar'>
                         <h3 className='detail-choices-option-selected'>Product Details</h3>
-                        <h3 className='detail-choices-option'>About the Vendor</h3>
+                        <h3 className='detail-choices-option' onClick={() => {navigate('/user/admin')}}>About the Vendor</h3>
                         <h3 className='detail-choices-option'>Reviews</h3>
                     </div>
                     <p>{listing_details.description}</p>
