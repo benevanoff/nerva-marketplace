@@ -1,0 +1,181 @@
+name: backend tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  market-service:
+    name: market service
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend/market_service
+    env:
+      DB_HOST: 127.0.0.1
+      CACHE_HOST: 127.0.0.1
+      PAYMENTS_BASE_URL: http://127.0.0.1:8880
+      MARKET_SERVICE_BASE_URL: http://127.0.0.1:8080
+      INVOICE_SERVICE_BASE_URL: http://127.0.0.1:8880
+      WALLET_RPC_HOST: 127.0.0.1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            backend/market_service/requirements.txt
+            backend/invoice_service/requirements.txt
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # cart checkout reaches the invoice service, so its deps are needed as well
+          pip install -r ../invoice_service/requirements.txt
+
+      - name: start mysql and redis
+        working-directory: .
+        run: |
+          docker run -d --name mysql -p 3306:3306 \
+            -e MYSQL_ROOT_PASSWORD=kkfkffspassss \
+            -v "$PWD/backend/market_service/infrastructure/schema.sql:/docker-entrypoint-initdb.d/01-market.sql:ro" \
+            -v "$PWD/backend/invoice_service/infrastructure/schema.sql:/docker-entrypoint-initdb.d/02-invoices.sql:ro" \
+            mysql:8
+          docker run -d --name redis -p 6379:6379 \
+            redis:alpine redis-server --requirepass yourpasswordkkfkfa
+
+      - name: wait for mysql to load the schemas
+        run: |
+          python - <<'EOF'
+          import time
+          import pymysql
+
+          for _ in range(60):
+              try:
+                  conn = pymysql.connect(host="127.0.0.1", user="root", password="kkfkffspassss")
+                  with conn.cursor() as cur:
+                      cur.execute("USE market")
+                      cur.execute("USE invoices_db")
+                  conn.close()
+                  print("mysql is up, both schemas are in place")
+                  break
+              except Exception:
+                  time.sleep(2)
+          else:
+              raise SystemExit("mysql never became ready")
+          EOF
+
+      - name: start the invoice service
+        working-directory: backend/invoice_service
+        run: |
+          # the real nerva wallet needs the blockchain, the fake one answers the
+          # json rpc calls the invoice service makes
+          nohup python tests/fake_wallet_rpc.py 28082 > wallet.log 2>&1 &
+          nohup python -m uvicorn src.http_server:app --host 127.0.0.1 --port 8880 > service.log 2>&1 &
+          timeout 60 bash -c 'until curl -sf http://127.0.0.1:8880/ > /dev/null; do sleep 1; done'
+
+      - name: start the market service
+        run: |
+          # uploaded listing images land here, the folder is gitignored
+          mkdir -p listing_image_storage
+          nohup python -m uvicorn src.http_server:app --host 127.0.0.1 --port 8080 > service.log 2>&1 &
+          timeout 60 bash -c 'until curl -sf http://127.0.0.1:8080/ > /dev/null; do sleep 1; done'
+
+      - name: run the test suite
+        run: python -m pytest tests -v
+
+      - name: dump service logs
+        if: failure()
+        working-directory: .
+        run: |
+          echo "=== invoice service ==="
+          cat backend/invoice_service/service.log 2>/dev/null || true
+          echo "=== fake wallet ==="
+          cat backend/invoice_service/wallet.log 2>/dev/null || true
+          echo "=== market service ==="
+          cat backend/market_service/service.log 2>/dev/null || true
+          echo "=== mysql ==="
+          docker logs mysql 2>&1 | tail -50 || true
+
+  invoice-service:
+    name: invoice service
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend/invoice_service
+    env:
+      DB_HOST: 127.0.0.1
+      INVOICE_SERVICE_BASE_URL: http://127.0.0.1:8880
+      WALLET_RPC_HOST: 127.0.0.1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: backend/invoice_service/requirements.txt
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: start mysql
+        working-directory: .
+        run: |
+          docker run -d --name mysql -p 3306:3306 \
+            -e MYSQL_ROOT_PASSWORD=kkfkffspassss \
+            -v "$PWD/backend/invoice_service/infrastructure/schema.sql:/docker-entrypoint-initdb.d/01-invoices.sql:ro" \
+            mysql:8
+
+      - name: wait for mysql to load the schema
+        run: |
+          python - <<'EOF'
+          import time
+          import pymysql
+
+          for _ in range(60):
+              try:
+                  conn = pymysql.connect(host="127.0.0.1", user="root", password="kkfkffspassss")
+                  with conn.cursor() as cur:
+                      cur.execute("USE invoices_db")
+                  conn.close()
+                  print("mysql is up, the schema is in place")
+                  break
+              except Exception:
+                  time.sleep(2)
+          else:
+              raise SystemExit("mysql never became ready")
+          EOF
+
+      - name: start the invoice service
+        run: |
+          nohup python tests/fake_wallet_rpc.py 28082 > wallet.log 2>&1 &
+          nohup python -m uvicorn src.http_server:app --host 127.0.0.1 --port 8880 > service.log 2>&1 &
+          timeout 60 bash -c 'until curl -sf http://127.0.0.1:8880/ > /dev/null; do sleep 1; done'
+
+      - name: run the test suite
+        run: python -m pytest tests -v
+
+      - name: dump service logs
+        if: failure()
+        run: |
+          echo "=== invoice service ==="
+          cat service.log 2>/dev/null || true
+          echo "=== fake wallet ==="
+          cat wallet.log 2>/dev/null || true
+          echo "=== mysql ==="
+          docker logs mysql 2>&1 | tail -50 || true
