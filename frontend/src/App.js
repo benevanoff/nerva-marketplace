@@ -17,6 +17,7 @@ import VendorOrders from "./VendorOrders.js"
 import VendorOrderDetail from "./VendorOrderDetail.js"
 import CustomerOrders from "./CustomerOrders.js"
 import CustomerOrderDetail from "./CustomerOrderDetail.js"
+import UserProfile from "./UserProfile.js"
 import { UserProvider } from './UserContext.js';
 
 const Home = () => {
@@ -36,6 +37,7 @@ function App() {
               <Route path="/create_listing" element={<ListingCreateForm/>} />
               <Route path="/listings" element={<ListingsDisplay/>} />
               <Route path="/listing/:listing_id" element={<Listing/>} />
+              <Route path="/user/:user_id" element={<UserProfile/>} />
               <Route path="/cart" element={<Cart/>} />
               <Route path="/invoice/:invoice_id" element={<Invoice/>} />
               <Route path="/vendor/orders" element={<VendorOrders/>} />

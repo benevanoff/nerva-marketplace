@@ -1,0 +1,88 @@
+.user-profile-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f9fafb;
+    border-radius: 8px;
+}
+
+.back-button {
+    background-color: #e5e7eb;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background-color: #d1d5db;
+}
+
+.user-profile-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.user-profile-header h1 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+}
+
+.user-type {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin: 0;
+    font-style: italic;
+}
+
+.user-profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.user-profile-stats.centered {
+    display: flex;
+    justify-content: center;
+}
+
+.stat-card {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+    margin: 0 0 1rem 0;
+    color: #4b5563;
+    font-size: 1.1rem;
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+.error {
+    color: #dc2626;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+}
+
+.user-profile-container button {
+    display: inline-block;
+    margin-top: 1rem;
+}
