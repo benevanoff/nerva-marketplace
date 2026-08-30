@@ -118,3 +118,81 @@ async def get_image(image_name:str, rds_client=Depends(get_db)):
     # get the file from the storage bucket and return it
     file_extension = image_name.split(".")[-1]
     return FileResponse(f'{ListingStorage().storage_root}/{image_name}', media_type=f"image/{file_extension}")
+
+
+class ReviewSubmission(BaseModel):
+    rating: int
+    comment: str = ""
+
+
+@market_router.get("/market/listing/{listing_id}/reviews")
+async def get_listing_reviews(listing_id:int, rds_client=Depends(get_db)):
+    # the summary (count + average) and the reviews themselves in one go
+    async with rds_client.cursor() as cur:
+        await cur.execute("SELECT COUNT(*) AS count, AVG(rating) AS average FROM reviews WHERE listing_id=%s", (listing_id,))
+        summary_row = await cur.fetchone()
+        await cur.execute("""
+            SELECT username, rating, comment, create_time
+            FROM reviews WHERE listing_id=%s
+            ORDER BY create_time DESC
+        """, (listing_id,))
+        review_rows = await cur.fetchall()
+    for review in review_rows:
+        if review.get("create_time"):
+            review["create_time"] = review["create_time"].strftime("%Y-%m-%d %H:%M:%S")
+    return {
+        "reviews": review_rows,
+        "count": int(summary_row["count"] or 0),
+        "average": round(float(summary_row["average"]), 2) if summary_row["average"] is not None else None
+    }
+
+
+@market_router.post("/market/listing/{listing_id}/review")
+async def create_listing_review(listing_id:int, submission:ReviewSubmission,
+                                session_id:str=Cookie(None), session_storage=Depends(get_sessions),
+                                rds_client=Depends(get_db)):
+    if not session_id:
+        raise HTTPException(status_code=401)
+    username = session_storage.getUserFromSession(session_id)
+    if not username:
+        raise HTTPException(status_code=422)
+    # keep the rating on the 1 to 5 scale
+    if submission.rating < 1 or submission.rating > 5:
+        raise HTTPException(status_code=422, detail="rating must be between 1 and 5")
+    if len(submission.comment) > 1024:
+        raise HTTPException(status_code=422, detail="comment is too long")
+    async with rds_client.cursor() as cur:
+        # the listing has to exist
+        await cur.execute("SELECT vendor FROM listings WHERE listing_id=%s", (listing_id,))
+        listing_row = await cur.fetchone()
+        if not listing_row:
+            raise HTTPException(status_code=404, detail="Listing not found")
+        # reviewing your own listing would be a bit too easy
+        if listing_row["vendor"] == username:
+            raise HTTPException(status_code=403, detail="Vendors cannot review their own listings")
+        # only people who actually bought this listing can review it
+        await cur.execute("""
+            SELECT 1
+            FROM orders o
+            JOIN order_items oi ON oi.order_id = o.order_id
+            WHERE o.buyer=%s AND oi.item_listing_id=%s
+            LIMIT 1
+        """, (username, listing_id))
+        purchase_row = await cur.fetchone()
+        if not purchase_row:
+            raise HTTPException(status_code=403, detail="Only buyers of this listing can review it")
+        # one review per buyer per listing, the unique key in the schema
+        # backs this up if two requests race each other
+        await cur.execute("SELECT review_id FROM reviews WHERE listing_id=%s AND username=%s", (listing_id, username))
+        if await cur.fetchone():
+            raise HTTPException(status_code=409, detail="You already reviewed this listing")
+        await cur.execute("""
+            INSERT INTO reviews (listing_id, username, rating, comment)
+            VALUES (%s, %s, %s, %s)
+        """, (listing_id, username, submission.rating, submission.comment.strip()))
+        review_id = cur.lastrowid
+        await cur.execute("SELECT username, rating, comment, create_time FROM reviews WHERE review_id=%s", (review_id,))
+        review_row = await cur.fetchone()
+    if review_row.get("create_time"):
+        review_row["create_time"] = review_row["create_time"].strftime("%Y-%m-%d %H:%M:%S")
+    return review_row

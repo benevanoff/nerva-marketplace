@@ -1,0 +1,202 @@
+/* ---------- reviews section on the listing page ---------- */
+
+.reviews-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: var(--color-text);
+    font-size: 0.95rem;
+}
+
+.reviews-summary strong {
+    font-size: 1.1rem;
+}
+
+.reviews-summary span,
+.reviews-muted,
+.reviews-loading {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.reviews-error {
+    color: var(--color-danger);
+}
+
+.review-stars {
+    display: inline-flex;
+    gap: 2px;
+    color: var(--color-warning);
+}
+
+/* ---------- review form ---------- */
+
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.review-form h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.review-star-picker {
+    display: flex;
+    gap: 4px;
+}
+
+.review-star-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: transform 0.1s ease, color 0.15s ease;
+}
+
+.review-star-button.filled {
+    color: var(--color-warning);
+}
+
+.review-star-button:hover {
+    transform: scale(1.15);
+}
+
+.review-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.review-form textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-surface);
+}
+
+.review-form button {
+    align-self: flex-start;
+    padding: 10px 22px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.review-form button:hover:not(:disabled) {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.review-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.review-form-feedback {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+.review-form-feedback.error {
+    color: var(--color-danger);
+}
+
+.reviews-login-link {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-family: inherit;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* ---------- reviews list ---------- */
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.review-item {
+    padding: 16px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    animation: review-in 0.25s ease;
+}
+
+.review-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.review-item-username {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--color-text);
+}
+
+.review-item-comment {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--color-text);
+    word-break: break-word;
+}
+
+.review-item-date {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+@keyframes review-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
