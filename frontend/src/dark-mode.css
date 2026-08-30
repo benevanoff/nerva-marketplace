@@ -1,0 +1,171 @@
+/* Dark theme overrides.
+   The base palette lives in index.css as CSS variables, so most of the work
+   here is re-declaring those variables plus fixing the few spots that still
+   hardcode light colors. Loaded through ThemeContext.js so it always comes
+   after the component stylesheets. */
+
+[data-theme='dark'] {
+    color-scheme: dark;
+
+    --color-primary: #41b4f0;
+    --color-primary-dark: #219de5;
+    --color-primary-light: #7cc8f5;
+    --color-accent: #92a0f5;
+    --color-accent-dark: #7682e9;
+    --color-bg: #0b101d;
+    --color-surface: #151c2e;
+    --color-text: #e6eaf2;
+    --color-text-muted: #8b94a7;
+    --color-border: #273047;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.45), 0 2px 4px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* smooth switch when toggling, without touching layout properties */
+body,
+.markethome-container,
+.navbar,
+.item-card,
+form,
+.login-card,
+.cart-grid,
+.shipping-details-section {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+/* scrollbar */
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+    background: #33405c;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+    background: #46557a;
+}
+
+/* native select options would otherwise render white text on white in dark mode */
+[data-theme='dark'] .shipping-dropdown option {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+/* ---------- status badges (orders, invoice) ---------- */
+
+[data-theme='dark'] .order-status.status-pending,
+[data-theme='dark'] .status-pending,
+[data-theme='dark'] .transaction-status.pending {
+    background-color: #3a2f14;
+    color: #fbbf24;
+}
+
+[data-theme='dark'] .order-status.status-confirmed,
+[data-theme='dark'] .status-confirmed,
+[data-theme='dark'] .transaction-status.confirmed,
+[data-theme='dark'] .status-badge.confirmed {
+    background-color: #12352a;
+    color: #34d399;
+}
+
+[data-theme='dark'] .order-status.status-shipped,
+[data-theme='dark'] .status-shipped {
+    background-color: #1e3a5f;
+    color: #60a5fa;
+}
+
+[data-theme='dark'] .order-status.status-pending-shipping,
+[data-theme='dark'] .order-status.status-not-shipped,
+[data-theme='dark'] .status-pending-shipping,
+[data-theme='dark'] .status-not-shipped {
+    background-color: #262c3a;
+    color: #9aa4b5;
+}
+
+[data-theme='dark'] .error {
+    color: #f87171;
+}
+
+[data-theme='dark'] .vendor-order-detail .error,
+[data-theme='dark'] .vendor-orders-container .error {
+    background-color: #3b1d1d;
+    border-color: #7f2e2e;
+}
+
+/* ---------- vendor order detail page ---------- */
+
+[data-theme='dark'] .shipping-action {
+    background-color: #33290f;
+}
+
+[data-theme='dark'] .update-status-button {
+    background-color: #a16207;
+    border-color: #b45309;
+    color: #fef3c7;
+}
+
+[data-theme='dark'] .update-status-button:hover:not(:disabled) {
+    background-color: #b45309;
+}
+
+/* ---------- cart ---------- */
+
+[data-theme='dark'] .cart-grid button:hover {
+    background: #3b1d1d;
+}
+
+/* ---------- user profile ---------- */
+
+[data-theme='dark'] .user-profile-container {
+    background-color: #0e1422;
+}
+
+[data-theme='dark'] .back-button {
+    background-color: #1c2436;
+    color: var(--color-text);
+}
+
+[data-theme='dark'] .back-button:hover {
+    background-color: #232d43;
+}
+
+[data-theme='dark'] .user-profile-header h1 {
+    color: var(--color-text);
+}
+
+[data-theme='dark'] .user-type {
+    color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .stat-card {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+[data-theme='dark'] .stat-card h3 {
+    color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .stat-value {
+    color: var(--color-primary);
+}
+
+[data-theme='dark'] .user-profile-container .error {
+    color: #f87171;
+}
+
+/* ---------- footer ---------- */
+
+[data-theme='dark'] .app-footer {
+    border-top-color: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .app-footer a {
+    color: var(--color-primary);
+}
+
+/* ---------- theme toggle in the side navbar ---------- */
+
+[data-theme='dark'] .navbar-theme-row button:hover {
+    background: var(--color-bg);
+}

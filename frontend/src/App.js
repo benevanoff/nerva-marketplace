@@ -19,6 +19,7 @@ import CustomerOrders from "./CustomerOrders.js"
 import CustomerOrderDetail from "./CustomerOrderDetail.js"
 import UserProfile from "./UserProfile.js"
 import { UserProvider } from './UserContext.js';
+import './App.css';
 
 const Home = () => {
   return <ListingsDisplay/>
@@ -48,19 +49,8 @@ function App() {
             </Routes>
           </div>
 
-          <footer style={{
-            textAlign: 'center',
-            padding: '1rem',
-            borderTop: '1px solid #e5e7eb',
-            color: '#4b5563',
-            fontSize: '0.95rem'
-          }}>
-            <a
-              href="/privacy_policy.txt"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#2563eb', textDecoration: 'underline' }}
-            >
+          <footer className="app-footer">
+            <a href="/privacy_policy.txt" target="_blank" rel="noopener noreferrer">
               Privacy Policy
             </a>
           </footer>
