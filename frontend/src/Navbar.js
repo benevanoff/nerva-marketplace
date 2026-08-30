@@ -66,6 +66,7 @@ const NavTab = ({ isOpen, onClose }) => {
                 <CloseButton onClick={onClose} />
             </div>
             {isVendor && <button onClick={() => {navigate('/create_listing')}}>Create Listing</button>}
+            {isVendor && <button onClick={() => {navigate('/vendor/listings')}}>My Listings</button>}
             {isVendor && <button onClick={() => {navigate('/vendor/orders')}}>Vendor Orders</button>}
             {userDetails && !isVendor && <button onClick={() => {navigate('/customer/orders')}}>Your Orders</button>}
             {userDetails ? <button onClick={handleLogout}>Logout</button> : <button onClick={() => {navigate('/login')}}>Login</button>}

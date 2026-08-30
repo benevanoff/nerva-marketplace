@@ -118,3 +118,94 @@ async def get_image(image_name:str, rds_client=Depends(get_db)):
     # get the file from the storage bucket and return it
     file_extension = image_name.split(".")[-1]
     return FileResponse(f'{ListingStorage().storage_root}/{image_name}', media_type=f"image/{file_extension}")
+
+
+class ListingUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    price_xnv: Optional[float] = None
+    quantity_available: Optional[int] = None
+
+
+@market_router.get("/market/listings/mine")
+async def get_my_listings(session_id:str=Cookie(None), session_storage=Depends(get_sessions),
+                          rds_client=Depends(get_db)):
+    # a vendor wants to see every listing they own, including sold out ones
+    if not session_id:
+        raise HTTPException(status_code=401)
+    username = session_storage.getUserFromSession(session_id)
+    if not username:
+        raise HTTPException(status_code=422)
+    async with rds_client.cursor() as cur:
+        await cur.execute("SELECT * FROM listings WHERE vendor=%s ORDER BY create_time DESC", (username,))
+        listing_rows = await cur.fetchall()
+    return listing_rows
+
+
+@market_router.put("/market/listing/{listing_id}")
+async def update_listing(listing_id:int, update:ListingUpdate,
+                         session_id:str=Cookie(None), session_storage=Depends(get_sessions),
+                         rds_client=Depends(get_db)):
+    if not session_id:
+        raise HTTPException(status_code=401)
+    username = session_storage.getUserFromSession(session_id)
+    if not username:
+        raise HTTPException(status_code=422)
+    async with rds_client.cursor() as cur:
+        await cur.execute("SELECT * FROM listings WHERE listing_id=%s", (listing_id,))
+        listing_row = await cur.fetchone()
+        if not listing_row:
+            raise HTTPException(status_code=404, detail="Listing not found")
+        # only the vendor who created the listing can touch it
+        if listing_row["vendor"] != username:
+            raise HTTPException(status_code=403, detail="You can only edit your own listings")
+        # validate whatever fields were sent
+        if update.title is not None and not update.title.strip():
+            raise HTTPException(status_code=422, detail="title cannot be empty")
+        if update.description is not None and not update.description.strip():
+            raise HTTPException(status_code=422, detail="description cannot be empty")
+        if update.price_xnv is not None and update.price_xnv < 0:
+            raise HTTPException(status_code=422, detail="price_xnv must be non-negative")
+        if update.quantity_available is not None and update.quantity_available < 0:
+            raise HTTPException(status_code=422, detail="quantity_available must be non-negative")
+        # build the update statement from the fields that were provided
+        fields = []
+        values = []
+        for column, value in (
+            ("title", update.title),
+            ("description", update.description),
+            ("price_xnv", update.price_xnv),
+            ("quantity_available", update.quantity_available),
+        ):
+            if value is not None:
+                fields.append(f"{column}=%s")
+                values.append(value)
+        if not fields:
+            raise HTTPException(status_code=422, detail="Nothing to update")
+        values.append(listing_id)
+        await cur.execute(f"UPDATE listings SET {', '.join(fields)} WHERE listing_id=%s", tuple(values))
+        await cur.execute("SELECT * FROM listings WHERE listing_id=%s", (listing_id,))
+        return await cur.fetchone()
+
+
+@market_router.post("/market/listing/{listing_id}/deactivate")
+async def deactivate_listing(listing_id:int,
+                             session_id:str=Cookie(None), session_storage=Depends(get_sessions),
+                             rds_client=Depends(get_db)):
+    # taking a listing off the shelf sets its quantity to 0, which hides it
+    # from the marketplace grid without breaking past orders that reference it
+    if not session_id:
+        raise HTTPException(status_code=401)
+    username = session_storage.getUserFromSession(session_id)
+    if not username:
+        raise HTTPException(status_code=422)
+    async with rds_client.cursor() as cur:
+        await cur.execute("SELECT * FROM listings WHERE listing_id=%s", (listing_id,))
+        listing_row = await cur.fetchone()
+        if not listing_row:
+            raise HTTPException(status_code=404, detail="Listing not found")
+        if listing_row["vendor"] != username:
+            raise HTTPException(status_code=403, detail="You can only deactivate your own listings")
+        await cur.execute("UPDATE listings SET quantity_available=0 WHERE listing_id=%s", (listing_id,))
+        await cur.execute("SELECT * FROM listings WHERE listing_id=%s", (listing_id,))
+        return await cur.fetchone()

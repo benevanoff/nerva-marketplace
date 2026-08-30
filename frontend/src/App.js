@@ -18,6 +18,7 @@ import VendorOrderDetail from "./VendorOrderDetail.js"
 import CustomerOrders from "./CustomerOrders.js"
 import CustomerOrderDetail from "./CustomerOrderDetail.js"
 import UserProfile from "./UserProfile.js"
+import VendorListings from "./VendorListings.js"
 import { UserProvider } from './UserContext.js';
 
 const Home = () => {
@@ -35,6 +36,7 @@ function App() {
               <Route path="activate/:token" element={<UserActivationPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/create_listing" element={<ListingCreateForm/>} />
+              <Route path="/vendor/listings" element={<VendorListings/>} />
               <Route path="/listings" element={<ListingsDisplay/>} />
               <Route path="/listing/:listing_id" element={<Listing/>} />
               <Route path="/user/:user_id" element={<UserProfile/>} />
