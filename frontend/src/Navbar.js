@@ -84,7 +84,7 @@ const NavBar = () => {
     return (<>
         <div className='markethome-container'>
             <NavButton onClick={toggleNavbar} />
-            <h1>Marketplace</h1>
+            <h1>Nerva Marketplace (beta)</h1>
             <ShoppingCartButton />
         </div>
         <NavTab isOpen={isNavbarOpen} onClose={closeNavbar} />
