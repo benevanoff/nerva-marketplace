@@ -2,9 +2,10 @@ import os
 import io
 import uuid
 import imghdr
+import json
 import logging
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter
 from PIL import Image, ImageOps
 from fastapi import FastAPI, Request, Depends, HTTPException, Response, Cookie, File, UploadFile, Form
@@ -13,6 +14,64 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from .dependencies import get_db, get_sessions
+
+
+def _normalize_shipping_options(raw_names: Optional[List[str]], raw_prices: Optional[List[str]], raw_options_json: Optional[str] = None):
+    if raw_options_json:
+        try:
+            options = json.loads(raw_options_json)
+        except json.JSONDecodeError as exc:
+            raise HTTPException(status_code=422, detail="shipping_options JSON is invalid") from exc
+        if isinstance(options, dict):
+            options = [options]
+        if not isinstance(options, list):
+            raise HTTPException(status_code=422, detail="shipping_options must be a list")
+
+        normalized = []
+        for option in options:
+            if not isinstance(option, dict):
+                raise HTTPException(status_code=422, detail="Each shipping option must be an object")
+            name = str(option.get("name") or option.get("shipping_option_name") or "").strip()
+            price = option.get("price")
+            if price is None:
+                price = option.get("price_xnv")
+            if price is None:
+                price = option.get("shipping_option_price")
+            if not name:
+                raise HTTPException(status_code=422, detail="shipping option name cannot be empty")
+            try:
+                price_value = float(price)
+            except (TypeError, ValueError) as exc:
+                raise HTTPException(status_code=422, detail=f"Invalid shipping option price for '{name}'") from exc
+            if price_value < 0:
+                raise HTTPException(status_code=422, detail="shipping_option_price must be non-negative")
+            normalized.append((name, price_value))
+        if not normalized:
+            return [("Standard Shipping", 0.0)]
+        return normalized
+
+    names = raw_names or []
+    prices = raw_prices or []
+    if len(names) != len(prices):
+        raise HTTPException(status_code=422, detail="shipping_option_name and shipping_option_price must have the same number of entries")
+
+    normalized = []
+    for name, price in zip(names, prices):
+        name = (name or "").strip()
+        if not name:
+            raise HTTPException(status_code=422, detail="shipping_option_name cannot be empty")
+        try:
+            price_value = float(price)
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=f"Invalid shipping option price for '{name}'") from exc
+        if price_value < 0:
+            raise HTTPException(status_code=422, detail="shipping_option_price must be non-negative")
+        normalized.append((name, price_value))
+
+    if not normalized:
+        return [("Standard Shipping", 0.0)]
+    return normalized
+
 
 market_router = APIRouter()
 
@@ -71,8 +130,9 @@ async def create_listing(session_id:str=Cookie(None), session_storage=Depends(ge
                          title: str = Form(...), description: str = Form(...),
                          price_xnv: float = Form(...),
                          quantity_available: int = Form(1),
-                         shipping_option_name: str = Form(...),
-                         shipping_option_price: float = Form(...),
+                         shipping_option_name: Optional[List[str]] = Form(None),
+                         shipping_option_price: Optional[List[str]] = Form(None),
+                         shipping_options: Optional[str] = Form(None),
                          file: Optional[UploadFile] = File(None)):
     # We need a valid session_id
     if not session_id:
@@ -82,12 +142,11 @@ async def create_listing(session_id:str=Cookie(None), session_storage=Depends(ge
     # enforce a positive integer quantity
     if quantity_available < 1:
         raise HTTPException(status_code=422, detail="quantity_available must be at least 1")
-    # enforce positive shipping option price
-    if shipping_option_price < 0:
-        raise HTTPException(status_code=422, detail="shipping_option_price must be non-negative")
-    # enforce shipping option name is not empty
-    if not shipping_option_name or not shipping_option_name.strip():
-        raise HTTPException(status_code=422, detail="shipping_option_name cannot be empty")
+
+    normalized_shipping_options = _normalize_shipping_options(shipping_option_name, shipping_option_price, shipping_options)
+
+    if file is None:
+        raise HTTPException(status_code=422, detail="A listing image is required")
     # enfore a max file size
     if file.size > ListingStorage.MAX_FILE_SIZE:
         raise HTTPException(status_code=422, detail="File too big")
@@ -113,13 +172,16 @@ async def create_listing(session_id:str=Cookie(None), session_storage=Depends(ge
             """, (title, description, f'{img_id}.{file_type}', price_xnv, username, quantity_available))
         # Get the listing_id that was just created
         listing_id = cur.lastrowid
-        # Insert the shipping option for this listing
-        await cur.execute("""
-            INSERT INTO shipping_options
-                (name, price_xnv, listing_id)
-            VALUES
-                (%s, %s, %s)
-            """, (shipping_option_name, shipping_option_price, listing_id))
+        # Insert each shipping option for this listing
+        for option_name, option_price in normalized_shipping_options:
+            await cur.execute("""
+                INSERT INTO shipping_options
+                    (name, price_xnv, listing_id)
+                VALUES
+                    (%s, %s, %s)
+                """, (option_name, option_price, listing_id))
+
+    return {"listing_id": listing_id}
 
 @market_router.get("/market/listing/image/{image_name}")
 async def get_image(image_name:str, rds_client=Depends(get_db)):
