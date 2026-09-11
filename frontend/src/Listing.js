@@ -75,7 +75,7 @@ const Listing = () => {
                         >
                             Product Details
                         </h3>
-                        <h3 className='detail-choices-option'>About the Vendor</h3>
+                        <h3 className='detail-choices-option' onClick={() => {navigate('/user/admin')}}>About the Vendor</h3>
                         <h3
                             className={activeTab === 'reviews' ? 'detail-choices-option-selected' : 'detail-choices-option'}
                             onClick={() => setActiveTab('reviews')}
