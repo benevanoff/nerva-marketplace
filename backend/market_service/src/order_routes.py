@@ -98,7 +98,13 @@ async def get_vendor_order_detail(order_id: int, session_id:str=Cookie(None), se
         items = await cur.fetchall()
         
         # Get shipping details
-        await cur.execute("SELECT shipping_note, shipping_status FROM order_shipping WHERE order_id=%s", (order_id,))
+        await cur.execute("""
+            SELECT os.shipping_note, os.shipping_status, os.option_id, so.name AS option_name, so.price_xnv AS option_price_xnv
+            FROM order_shipping os
+            LEFT JOIN shipping_options so ON so.id = os.option_id
+            WHERE os.order_id=%s
+            LIMIT 1
+        """, (order_id,))
         shipping = await cur.fetchone()
         
         # Get customer details
@@ -128,7 +134,9 @@ async def get_vendor_order_detail(order_id: int, session_id:str=Cookie(None), se
             ],
             "shipping": {
                 "note": shipping['shipping_note'] if shipping else None,
-                "status": shipping['shipping_status'] if shipping else None
+                "status": shipping['shipping_status'] if shipping else None,
+                "option_name": shipping['option_name'] if shipping else None,
+                "option_price_xnv": float(shipping['option_price_xnv']) if shipping and shipping.get('option_price_xnv') is not None else None
             }
         }
 

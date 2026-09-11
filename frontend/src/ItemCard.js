@@ -15,7 +15,7 @@ const ItemCard = ({ listing_id, title, imageName, price_xnv, qnty }) => {
                 <NervaBadge price_xnv={price_xnv}/>
             </div>
             <div>
-                <p>Qty: {qnty}</p>
+                <p>In Stock: {qnty}</p>
             </div>
         </div>
     );

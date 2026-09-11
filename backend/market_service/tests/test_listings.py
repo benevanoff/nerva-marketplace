@@ -101,6 +101,27 @@ class TestListingsAPIs(unittest.TestCase):
             }
             response = session.post(f'{self.test_host}/market/listing/create', data=form_text_bad_qty, files={'file': open('tests/test.png', 'rb')})
             assert response.status_code == 422
+            # now create a listing with multiple shipping options
+            multi_option_form = [
+                ('title', 'Multi-Option Listing'),
+                ('description', 'This listing has several shipping choices'),
+                ('price_xnv', 11),
+                ('quantity_available', 3),
+                ('shipping_option_name', 'Standard Mail'),
+                ('shipping_option_name', 'Express Mail'),
+                ('shipping_option_price', 5),
+                ('shipping_option_price', 15),
+            ]
+            response = session.post(f'{self.test_host}/market/listing/create', data=multi_option_form, files={'file': open('tests/test.png', 'rb')})
+            assert response.status_code == 200
+            response = session.get(f'{self.test_host}/market/listings')
+            response_json = response.json()
+            multi_option_listing = next(l for l in response_json if l["title"] == "Multi-Option Listing")
+            response = session.get(f'{self.test_host}/market/listing/{multi_option_listing["listing_id"]}/shipping_options')
+            assert response.status_code == 200
+            shipping_options = response.json()
+            assert len(shipping_options) == 2
+            assert {option["name"] for option in shipping_options} == {"Standard Mail", "Express Mail"}
 
 def create_test_listing():
     # make sure test user is in db

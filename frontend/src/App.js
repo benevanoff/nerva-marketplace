@@ -18,6 +18,8 @@ import VendorOrderDetail from "./VendorOrderDetail.js"
 import CustomerOrders from "./CustomerOrders.js"
 import CustomerOrderDetail from "./CustomerOrderDetail.js"
 import UserProfile from "./UserProfile.js"
+import NotFound from "./NotFound.js"
+import ScrollToTop from "./ScrollToTop.js"
 import { UserProvider } from './UserContext.js';
 
 const Home = () => {
@@ -28,6 +30,7 @@ function App() {
   return (
     <UserProvider>
       <Router>
+        <ScrollToTop />
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1 }}>
             <Routes>
@@ -45,6 +48,7 @@ function App() {
               <Route path="/customer/orders/:order_id" element={<CustomerOrderDetail/>} />
               <Route path="/customer/orders" element={<CustomerOrders/>} />
               <Route path="/" element={<Home />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
 

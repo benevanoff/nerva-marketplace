@@ -215,6 +215,15 @@ const VendorOrderDetail = () => {
                             <span className="label">Shipping Note:</span>
                             <p className="shipping-note">{order.shipping.note || 'No shipping note provided'}</p>
                         </div>
+                        <div className="shipping-item">
+                            <span className="label">Shipping Option:</span>
+                            <span className="value">
+                                {order.shipping.option_name || 'No shipping option selected'}
+                                {order.shipping.option_name && order.shipping.option_price_xnv !== null && order.shipping.option_price_xnv !== undefined
+                                    ? ` — ${order.shipping.option_price_xnv} XNV`
+                                    : ''}
+                            </span>
+                        </div>
                     </div>
                 ) : (
                     <p>No shipping information available</p>
