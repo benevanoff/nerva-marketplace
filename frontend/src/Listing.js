@@ -4,6 +4,7 @@ import NavBar from './Navbar';
 import './listing.css'
 import NervaBadge from './nerva_badge';
 import UserContext from './UserContext';
+import { ListingSkeleton } from './Skeletons';
 
 const Listing = () => {
     const { listing_id } = useParams();
@@ -77,7 +78,7 @@ const Listing = () => {
         } else {
             return (
                 <>
-                    <p>Loading...</p>
+                    <ListingSkeleton />
                 </>
             );
         }

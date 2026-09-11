@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './vendorOrders.css';
+import { OrderListSkeleton } from './Skeletons';
 
 const CustomerOrders = () => {
     const [orders, setOrders] = useState(null);
@@ -39,7 +40,7 @@ const CustomerOrders = () => {
     }, [navigate]);
 
     if (loading) {
-        return <div className="vendor-orders-container"><p>Loading order history...</p></div>;
+        return <OrderListSkeleton />;
     }
 
     if (error) {

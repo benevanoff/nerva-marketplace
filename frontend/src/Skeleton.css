@@ -1,0 +1,122 @@
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--color-border) 25%,
+        var(--color-bg) 50%,
+        var(--color-border) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+    from {
+        background-position: 200% 0;
+    }
+    to {
+        background-position: -200% 0;
+    }
+}
+
+/* ---------- listing detail page ---------- */
+
+.listing-skeleton-title {
+    height: 32px;
+    width: 40%;
+    margin: 0 auto 20px;
+}
+
+.listing-skeleton-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-md);
+}
+
+.listing-skeleton-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.listing-skeleton-price {
+    height: 26px;
+    width: 110px;
+    border-radius: 10px;
+}
+
+.listing-skeleton-button {
+    height: 38px;
+    width: 140px;
+    border-radius: var(--radius-sm);
+}
+
+.listing-skeleton-line {
+    height: 14px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.listing-skeleton-line.short {
+    width: 65%;
+}
+
+/* ---------- cart page ---------- */
+
+.cart-skeleton-thumb {
+    width: 80px;
+    height: 80px;
+}
+
+.cart-skeleton-title {
+    height: 18px;
+    width: 60%;
+    margin-bottom: 8px;
+}
+
+.cart-skeleton-price {
+    height: 14px;
+    width: 35%;
+}
+
+.cart-skeleton-actions {
+    height: 36px;
+    width: 170px;
+}
+
+/* ---------- orders pages ---------- */
+
+.orders-skeleton-heading {
+    height: 36px;
+    width: 220px;
+    margin-bottom: 20px;
+}
+
+.orders-skeleton-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: default;
+}
+
+.orders-skeleton-line {
+    height: 16px;
+    width: 50%;
+}
+
+.orders-skeleton-line.short {
+    width: 30%;
+}
+
+/* ---------- image fade in ---------- */
+
+.img-fade {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.img-fade.loaded {
+    opacity: 1;
+}
