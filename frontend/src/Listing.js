@@ -4,10 +4,12 @@ import NavBar from './Navbar';
 import './listing.css'
 import NervaBadge from './nerva_badge';
 import UserContext from './UserContext';
+import ReviewsSection from './ReviewsSection';
 
 const Listing = () => {
     const { listing_id } = useParams();
     const [listing_details, setDetails] = useState(null);
+    const [activeTab, setActiveTab] = useState('details');
     const [showModal, setModalState] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const { userDetails, authChecked } = useContext(UserContext);
@@ -67,11 +69,25 @@ const Listing = () => {
                         </button>
                     </div>
                     <div className='detail-choices-bar'>
-                        <h3 className='detail-choices-option-selected'>Product Details</h3>
-                        <h3 className='detail-choices-option' onClick={() => {navigate('/user/admin')}}>About the Vendor</h3>
-                        <h3 className='detail-choices-option'>Reviews</h3>
+                        <h3
+                            className={activeTab === 'details' ? 'detail-choices-option-selected' : 'detail-choices-option'}
+                            onClick={() => setActiveTab('details')}
+                        >
+                            Product Details
+                        </h3>
+                        <h3 className='detail-choices-option'>About the Vendor</h3>
+                        <h3
+                            className={activeTab === 'reviews' ? 'detail-choices-option-selected' : 'detail-choices-option'}
+                            onClick={() => setActiveTab('reviews')}
+                        >
+                            Reviews
+                        </h3>
+
                     </div>
-                    <p>{listing_details.description}</p>
+                    {activeTab === 'reviews'
+                        ? <ReviewsSection listing_id={listing_id} />
+                        : <p>{listing_details.description}</p>
+                    }
                 </div>
             </>);
         } else {

@@ -62,3 +62,14 @@ CREATE TABLE shipping_options (
     price_xnv DECIMAL(20,12) NOT NULL,
     listing_id INT NOT NULL
 );
+
+DROP TABLE IF EXISTS `reviews`;
+CREATE TABLE reviews (
+    review_id INT PRIMARY KEY AUTO_INCREMENT,
+    listing_id INT NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    rating INT NOT NULL,
+    comment VARCHAR(1024) DEFAULT '',
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_review (listing_id, username)
+);
