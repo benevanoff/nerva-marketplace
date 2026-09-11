@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './cart.css'
+import { useToast } from './ToastContext';
 
 const CartItem = ({ listing_id, onRemove, onShippingOptionChange }) => {
 
@@ -101,6 +102,7 @@ const Cart = () => {
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const [shippingSelections, setShippingSelections] = useState({});
     const navigate = useNavigate();
+    const { showToast } = useToast();
 
     const fetchCart = async () => {
         try {
@@ -114,7 +116,6 @@ const Cart = () => {
             console.error('Error:', error);
         }
     };
-
     useEffect(() => {
         fetchCart();
     }, []);
@@ -158,7 +159,7 @@ const Cart = () => {
         try {
             const shippingSuccess = await postShippingDetailsRequest();
             if (!shippingSuccess) {
-                alert('Failed to save shipping details');
+                showToast('Could not save your shipping details. Please try again.', 'error');
                 setIsCheckingOut(false);
                 return;
             }
@@ -168,10 +169,24 @@ const Cart = () => {
                 credentials: 'include'
             });
             const result = await response.json();
-            navigate("/invoice/"+result.invoice_id);
+            if (response.ok && result && result.invoice_id) {
+                navigate("/invoice/"+result.invoice_id);
+                return;
+            }
+            // the backend returns bare codes for a few known checkout refusals
+            if (result === 300) {
+                showToast('Please fill in your shipping details before checking out.', 'error');
+            } else if (result === 505) {
+                showToast('All items in your cart must come from the same vendor.', 'error');
+            } else if (result === 600) {
+                showToast('One of the items in your cart just went out of stock.', 'error');
+            } else {
+                showToast('Checkout failed. Please try again.', 'error');
+            }
+            setIsCheckingOut(false);
         } catch (error) {
             console.error('Error:', error);
-            alert('Checkout failed. Please try again.');
+            showToast('Checkout failed. Please check your connection and try again.', 'error');
             setIsCheckingOut(false);
         }
     };

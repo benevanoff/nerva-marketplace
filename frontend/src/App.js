@@ -21,6 +21,7 @@ import UserProfile from "./UserProfile.js"
 import NotFound from "./NotFound.js"
 import ScrollToTop from "./ScrollToTop.js"
 import { UserProvider } from './UserContext.js';
+import { ToastProvider } from './ToastContext.js';
 
 const Home = () => {
   return <ListingsDisplay/>
@@ -29,6 +30,7 @@ const Home = () => {
 function App() {
   return (
     <UserProvider>
+      <ToastProvider>
       <Router>
         <ScrollToTop />
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -70,6 +72,7 @@ function App() {
           </footer>
         </div>
       </Router>
+      </ToastProvider>
     </UserProvider>
   );
 }

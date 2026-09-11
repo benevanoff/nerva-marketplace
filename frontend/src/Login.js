@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import UserContext from './UserContext.js';
+import { useToast } from './ToastContext.js';
 
 import './login.css'
 
@@ -10,6 +11,7 @@ const LoginCard = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { refetchUser } = useContext(UserContext);
+    const { showToast } = useToast();
     const returnTo = location.state && location.state.from ? location.state.from : '/listings';
 
     const postLoginRequest = async (username, password) => {
@@ -33,6 +35,7 @@ const LoginCard = () => {
               });
             } else {
               console.log('Login failed with status:', status);
+              showToast('Login failed. Please check your username and password.', 'error');
             }
           });
           
